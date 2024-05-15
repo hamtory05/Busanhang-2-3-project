@@ -1,94 +1,94 @@
 #include <stdio.h> 
 #include <stdlib.h> 
   
-// --<< º¯¼ö Á¤¸® >>--  
+// --<< ë³€ìˆ˜ ì •ë¦¬ >>--  
   
-// 1) ÆÄ¶ó¹ÌÅÍ 
-#define LEN_MIN 15 // ±âÂ÷ ±æÀÌ
+// 1) íŒŒë¼ë¯¸í„° 
+#define LEN_MIN 15 // ê¸°ì°¨ ê¸¸ì´
 #define LEN_MAX 50
-#define STM_MIN 0 // ¸¶µ¿¼® Ã¼·Â
+#define STM_MIN 0 // ë§ˆë™ì„ ì²´ë ¥
 #define STM_MAX 5 
-#define PROB_MIN 10 // È®·ü 
+#define PROB_MIN 10 // í™•ë¥  
 #define PROB_MAX 90 
-#define AGGRO_MIN 0 // ¾î±×·Î ¹üÀ§ 
+#define AGGRO_MIN 0 // ì–´ê·¸ë¡œ ë²”ìœ„ 
 #define AGGRO_MAX 5
  
-// 2) ¸¶µ¿¼® ÀÌµ¿ ¹æÇâ
+// 2) ë§ˆë™ì„ ì´ë™ ë°©í–¥
 #define MOVE_LEFT 1
 #define MOVE_STAY 0
 
-// 3) Á»ºñÀÇ °ø°İ ´ë»ó
+// 3) ì¢€ë¹„ì˜ ê³µê²© ëŒ€ìƒ
 #define ATK_NONE 0
 #define ATK_CITIZEN 1
 #define ATK_DONGSEOK 2
 
-// 4) ¸¶µ¿¼® Çàµ¿
+// 4) ë§ˆë™ì„ í–‰ë™
 #define ACTION_REST 0
 #define ACTION_PROVOKE 1
 #define ACTION_PULL 2
 
-// 5) Àü¿ª º¯¼ö
-int train_length; // ±âÂ÷ ±æÀÌ
-int madongseok_stamina; //¸¶µ¿¼® Ã¼·Â 
-int probability, p; // È®·ü
-int citizen; // ½Ã¹Î
-int zombie; // Á»ºñ
-int madongseok; // ¸¶µ¿¼®
-int aggro = 1; // ¾î±×·Î
+// 5) ì „ì—­ ë³€ìˆ˜
+int train_length; // ê¸°ì°¨ ê¸¸ì´
+int madongseok_stamina; //ë§ˆë™ì„ ì²´ë ¥ 
+int probability, p; // í™•ë¥ 
+int citizen; // ì‹œë¯¼
+int zombie; // ì¢€ë¹„
+int madongseok; // ë§ˆë™ì„
+int aggro = 1; // ì–´ê·¸ë¡œ
 
-// --<< ÇÊ¿äÇÑ ÇÔ¼ö Á¤ÀÇ >>--
+// --<< í•„ìš”í•œ í•¨ìˆ˜ ì •ì˜ >>--
 
-// 1) ±âÂ÷ ±æÀÌ (ÀÔ·Â ¹× ¿¹¿ÜÃ³¸®) ÇÔ¼ö ¼±¾ğ
+// 1) ê¸°ì°¨ ê¸¸ì´ (ì…ë ¥ ë° ì˜ˆì™¸ì²˜ë¦¬) í•¨ìˆ˜ ì„ ì–¸
 int train_length_func();
 int train_length_func() {
-	// À¯È¿ÇÑ °ªÀÌ ÀÔ·ÂµÉ ¶§±îÁö ¹«ÇÑ¹İº¹
+	// ìœ íš¨í•œ ê°’ì´ ì…ë ¥ë  ë•Œê¹Œì§€ ë¬´í•œë°˜ë³µ
 	while (1) {
 		printf("train length(%d ~ %d)>>", LEN_MIN, LEN_MAX);
 		scanf_s("%d", &train_length);
-		// ±âÂ÷ ±æÀÌ°¡ 15 ~ 50 »çÀÌÀÏ ¶§
+		// ê¸°ì°¨ ê¸¸ì´ê°€ 15 ~ 50 ì‚¬ì´ì¼ ë•Œ
 		if (train_length >= LEN_MIN && train_length <= LEN_MAX) {
-			// * ¸¶µ¿¼®, ½Ã¹Î, Á»ºñ ÃÊ±â À§Ä¡ ¼³Á¤ *
+			// * ë§ˆë™ì„, ì‹œë¯¼, ì¢€ë¹„ ì´ˆê¸° ìœ„ì¹˜ ì„¤ì • *
 			int madongseok = train_length - 2, zombie = train_length - 3, citizen = train_length - 6;
 			break;
 		}
 	}
 }
 
-// 2) ¸¶µ¿¼® Ã¼·Â (ÀÔ·Â ¹× ¿¹¿ÜÃ³¸®) ÇÔ¼ö ¼±¾ğ
+// 2) ë§ˆë™ì„ ì²´ë ¥ (ì…ë ¥ ë° ì˜ˆì™¸ì²˜ë¦¬) í•¨ìˆ˜ ì„ ì–¸
 int madongseok_stamina_func();
 int madongseok_stamina_func() {
-	// À¯È¿ÇÑ °ªÀÌ ÀÔ·ÂµÉ ¶§±îÁö ¹«ÇÑ¹İº¹
+	// ìœ íš¨í•œ ê°’ì´ ì…ë ¥ë  ë•Œê¹Œì§€ ë¬´í•œë°˜ë³µ
 	while (1) {
 		printf("madongseok stamina(%d ~ %d)>>", STM_MIN, STM_MAX);
 		scanf_s("%d", &madongseok_stamina);
-		// ¸¶µ¿¼® Ã¼·ÂÀÌ 0~5 »çÀÌÀÏ ¶§
+		// ë§ˆë™ì„ ì²´ë ¥ì´ 0~5 ì‚¬ì´ì¼ ë•Œ
 		if (madongseok_stamina >= STM_MIN && madongseok_stamina <= STM_MAX) {
 			break;
 		}
 	}
 }
 
-// 3) È®·ü (ÀÔ·Â ¹× ¿¹¿ÜÃ³¸®) ÇÔ¼ö ¼±¾ğ
+// 3) í™•ë¥  (ì…ë ¥ ë° ì˜ˆì™¸ì²˜ë¦¬) í•¨ìˆ˜ ì„ ì–¸
 int probability_func();
 int probability_func() {
-	// À¯È¿ÇÑ °ªÀÌ ÀÔ·ÂµÉ ¶§±îÁö ¹«ÇÑ¹İº¹
+	// ìœ íš¨í•œ ê°’ì´ ì…ë ¥ë  ë•Œê¹Œì§€ ë¬´í•œë°˜ë³µ
 	while (1) {
 		printf("percentile probability 'p'(%d ~ %d)>>", PROB_MIN, PROB_MAX);
 		scanf_s("%d", &probability);
 		p = probability;
-		// È®·üÀÌ 10 ~ 90 »çÀÌÀÏ ¶§
+		// í™•ë¥ ì´ 10 ~ 90 ì‚¬ì´ì¼ ë•Œ
 		if (p >= PROB_MIN && p <= PROB_MAX) {
 			break;
 		}
 	}
 }
 
-// 4) ±âÂ÷ »óÅÂ (Ã¹Â°, µÑÂ°, ¼ÂÂ° ÁÙ) ÇÔ¼ö ¼±¾ğ
+// 4) ê¸°ì°¨ ìƒíƒœ (ì²«ì§¸, ë‘˜ì§¸, ì…‹ì§¸ ì¤„) í•¨ìˆ˜ ì„ ì–¸
 int train_shape_first_func();
 int train_shape_second_func();
 int train_shape_third_func();
 
-// ±âÂ÷ Ã¹Â° ÁÙ
+// ê¸°ì°¨ ì²«ì§¸ ì¤„
 int train_shape_first_func() {
 	for (int i = 0; i < train_length; i++) {
 		printf("#");
@@ -96,10 +96,10 @@ int train_shape_first_func() {
 	printf("\n");
 }
 
-// ±âÂ÷ µÑÂ° ÁÙ
+// ê¸°ì°¨ ë‘˜ì§¸ ì¤„   -> ì´ê±° ì¢€ ê³ ì³ì•¼ë¨ !
 int train_shape_second_func() {
 	for (int i = 0; i < train_length; i++) {
-		// ±âÂ÷ÀÇ Ã³À½°ú ³¡À» '#' À¸·Î ¸¶¹«¸®
+		// ê¸°ì°¨ì˜ ì²˜ìŒê³¼ ëì„ '#' ìœ¼ë¡œ ë§ˆë¬´ë¦¬
 		if (i == 0 || i == train_length - 1) {
 			printf("#");
 		}
@@ -119,7 +119,7 @@ int train_shape_second_func() {
 	printf("\n");
 }
 
-// ±âÂ÷ ¼ÂÂ° ÁÙ
+// ê¸°ì°¨ ì…‹ì§¸ ì¤„
 int train_shape_third_func() {
 	for (int i = 0; i < train_length; i++) {
 		printf("#");
@@ -127,14 +127,14 @@ int train_shape_third_func() {
 	printf("\n");
 }
 
-// --<< ¸ŞÀÎ ÄÚµå ÀÛ¼º >>--
+// --<< ë©”ì¸ ì½”ë“œ ì‘ì„± >>--
 int main(void) {
-	train_length_func(); // ±âÂ÷ ÇÔ¼ö ºÒ·¯¿À±â
-	madongseok_stamina_func(); // ¸¶µ¿¼® Ã¼·Â ÇÔ¼ö ºÒ·¯¿À±â
-	probability_func(); // È®·ü ÇÔ¼ö ºÒ·¯¿À±â
-	train_shape_first_func(); // ±âÂ÷ (Ã¹Â° ÁÙ) »óÅÂ ºÒ·¯¿À±â
-	train_shape_second_func(); // ±âÂ÷ (µÑÂ° ÁÙ) »óÅÂ ºÒ·¯¿À±â
-	train_shape_third_func(); // ±âÂ÷ (¼ÂÂ° ÁÙ) »óÅÂ ºÒ·¯¿À±â
+	train_length_func(); // ê¸°ì°¨ í•¨ìˆ˜ ë¶ˆëŸ¬ì˜¤ê¸°
+	madongseok_stamina_func(); // ë§ˆë™ì„ ì²´ë ¥ í•¨ìˆ˜ ë¶ˆëŸ¬ì˜¤ê¸°
+	probability_func(); // í™•ë¥  í•¨ìˆ˜ ë¶ˆëŸ¬ì˜¤ê¸°
+	train_shape_first_func(); // ê¸°ì°¨ (ì²«ì§¸ ì¤„) ìƒíƒœ ë¶ˆëŸ¬ì˜¤ê¸°
+	train_shape_second_func(); // ê¸°ì°¨ (ë‘˜ì§¸ ì¤„) ìƒíƒœ ë¶ˆëŸ¬ì˜¤ê¸°
+	train_shape_third_func(); // ê¸°ì°¨ (ì…‹ì§¸ ì¤„) ìƒíƒœ ë¶ˆëŸ¬ì˜¤ê¸°
 
 
 } 
