@@ -43,9 +43,9 @@ int pre_citizen_aggro; // 시민 (전) 어그로
 int madongseok_aggro = 1; // 마동석 어그로
 int pre_madongseok_aggro; // 마동석 (전) 어그로
 int madongseok_move; // 마동석 이동
-int phase; // 턴, 페이즈
+int phase = 1; // 턴, 페이즈
 int madongseok_action; // 마동석 행동
-
+int zombie_move_or_not; // 좀비가 마동석의 붙잡기에 따라 움직일지 안 움직일지 정하기
 
 // --<< 필요한 함수 정의 >>--
 
@@ -107,7 +107,7 @@ int probability_func() {
 int train_shape_first_third_func();
 int train_shape_second_func();
 
-// 기차 첫째 줄, 셋째 줄
+// 4-1) 기차 첫째 줄, 셋째 줄
 int train_shape_first_third_func() {
 	for (int i = 0; i < train_length; i++) {
 		printf("#");
@@ -115,7 +115,7 @@ int train_shape_first_third_func() {
 	printf("\n");
 }
 
-// 기차 둘째 줄
+// 4-2) 기차 둘째 줄
 int train_shape_second_func() {
 	for (int i = 0; i < train_length; i++) {
 		// 기차의 처음과 끝을 '#' 으로 마무리
@@ -153,11 +153,15 @@ int madongseok_move_func() {
 }
 
 // 6) 시민(어그로 포함) 좀비 이동 함수 선언 
-int C_Z_move_func(); // 시민 좀비 이동 함수
+int citizen_move_main_func(); // 시민 메인 이동 함수
+int zombie_move_main_func(); // 좀비 메인 이동 함수
 int citizen_move_func(); // 시민 이동 함수
+int citizen_aggro_max_func(); // 시민 최대 어그로 (예외처리) 함수
 int citizen_move_left_func(); // 시민 이동 (왼쪽 한칸) 함수
 int citizen_move_stay_func(); // 시민 이동 (왼쪽 한칸 X) 함수
 int zombie_move_func(); // 좀비 이동 함수
+int zombie_attack_func(); // 좀비 공격 행동 규칙 함수
+int zombie_move_or_not_func(); //  마동석이 좀비 붙들기에 성공했을때 or 실패했을 때의 좀비 이동 상태 함수
 int zombie_move_citizen_func(); // 좀비 -> 시민 이동 함수
 int zombie_move_madongseok_func(); // 좀비 -> 마동석 이동 함수
 
@@ -177,8 +181,8 @@ int citizen_move_left_func() {
 	printf("citizen: %d -> %d (aggro: %d -> %d)\n", pre_citizen, citizen, pre_citizen_aggro, citizen_aggro);
 }
 
-// 6-2) 시민 이동 (왼쪽 한칸 X) 함수
-int citizen_move_stay_func() {
+// 6-2) 시민 최대 어그로 (예외처리) 함수
+int citizen_aggro_max_func() {
 	pre_citizen_aggro = citizen_aggro;
 	if (citizen_aggro <= AGGRO_MIN) {
 		citizen_aggro = 0;
@@ -188,46 +192,97 @@ int citizen_move_stay_func() {
 	}
 	printf("citizen: stay %d (aggro: %d -> %d)", citizen, pre_citizen_aggro, citizen_aggro);
 }
+// 6-3) 시민 이동 (왼쪽 한칸 X) 함수
+int citizen_move_stay_func() {
+	citizen_aggro_max_func(); 
+}
 
-// 6-3) 시민 이동 메인 함수 
+// 6-4) 시민 이동 메인 함수 
 int citizen_move_func() {
-	if (rand_func() >= p - 100) {
+	if (p - 100 > rand_func()) {
 		citizen_move_left_func();
 	}
 	else {
 		citizen_move_stay_func();
 	}
 }
-// 6-4) 좀비 -> 시민 이동 함수
-// 6-5) 좀비 -> 마동석 이동 함수
-// 6-6) 좀비 이동 함수
+
+// 6-5) 마동석이 좀비 붙들기에 성공했을때 or 실패했을 때의 좀비 이동 상태 함수
+int zombie_move_or_not_func() {
+	if (zombie_move_or_not == 0) { // 좀비 붙들기에 성공했을 때
+		phase -= 1;
+	}
+	else { // 좀비 붙들기에 실패했을 때
+		phase = phase;
+	}
+	return phase;
+}
+// 6-5) 좀비 -> 시민 이동 함수
+int zombie_move_citizen_func() {
+	zombie -= 1;
+	// 마동석이 좀비 붙들기를 성공했을 때 (좀비 이동 불가)
+	zombie_move_or_not_func(); 
+	// 시민과 이미 민접해 있을 때
+	if (zombie - 1 == citizen) {
+		zombie = zombie;
+	}
+	else { // 민접해 있지 않을 때
+		zombie -= 1;
+	}
+}
+// 6-6) 좀비 -> 마동석 이동 함수
+int zombie_move_madongseok_func() {
+	// 마동석이 좀비 붙들기를 성공했을 때 (좀비 이동 불가)
+	zombie_move_or_not_func(); 
+	// 마동석과 이미 민접해 있을 때
+	if (zombie + 1 == madongseok) {
+		zombie = zombie;
+	}
+	else { // 민접해 있지 않을 때
+		zombie -= 1;
+	}
+}
+
+// 6-7) 좀비 이동 함수
 int zombie_move_func() {
 	if (phase % 2 == 0) { // 턴이 짝수일 때 (즉, 2턴마다)
 		if (citizen_aggro > madongseok_aggro) { // 시민 어그로가 마동석 어그로보다 클 때
-
+			zombie_move_citizen_func();
 		}
 		else if (madongseok_aggro > citizen_aggro) { // 마동석 어그로가 시민 어그로보다 클 때
-
+			zombie_move_madongseok_func();
 		}
 		else { // 시민 어그로와 마동석 어그로가 같을 때
-
+			zombie_move_citizen_func();
 		}
-	}
-	else {
-
 	}
 }
 
-// 6-5) 시민 좀비 메인 이동 함수
-int C_Z_move_func() {
+// 6-8) 좀비 공격 함수
+int zombie_attack_func() {
+	
+}
+
+// 6-8) 시민 메인 이동 함수
+int citizen_move_main_func() {
 	citizen_move_func();
-	zombie_move_func();
+}
+
+// 6-9) 좀비 메인 이동 함수
+int zombie_move_main_func() {
+	if (zombie_move_func()) {
+
+	}
 }
 
 // 7) 마동석 행동 함수 선언 
-int madongseok_action_func();
+int madongseok_action_func(); // 마동석 행동 메인 함수
 int madongseok_action_0_func(); // 마동석 행동이 0을 입력 받았을 때의 함수
 int madongseok_action_1_func(); // 마동석 행동이 1을 입력 받았을 때의 함수
+int madongseok_action_2_func(); // 마동석 행동이 2를 입력 받았을 때의 함수
+int madongseok_action_withzombie_func(); // 마동석이 좀비와 인접한 경우의 함수
+int madongseok_aggro_max_func(); // 마동석 어그로가 최대를 넘지 않기 위한 함수
+int madongseok_action_start_func(); // 마동석 행동 입력 받았을 때 실행시킬 함수
 
 // 7-1) 마동석 휴식 함수 (0을 입력 받았을 때)
 int madongseok_action_0_func() {
@@ -239,7 +294,22 @@ int madongseok_action_0_func() {
 	printf("madongseok: %d (aggro: %d -> %d, stamina: %d -> %d\n", madongseok, pre_madongseok_aggro, madongseok_aggro, pre_madongseok_stamina, madongseok_stamina);
 }
 
-// 7-2) 마동석 휴식 함수 (1을 입력 받았을 때)
+// 7-2) 마동석 최대 어그로 및 스테미나 (2번 입력 행동부분 예외처리) 함수 선언
+int madongseok_aggro_max_func() {
+	pre_madongseok_aggro = madongseok_aggro;
+	madongseok_aggro += 2;
+	pre_madongseok_stamina = madongseok_stamina;
+	madongseok_stamina -= 1;
+	// 마동석 어그로가 최대 어그로가 되었을 때
+	if (madongseok_aggro >= AGGRO_MAX) {
+		madongseok_aggro = 5;
+	}
+	else {
+		madongseok_aggro += 1;
+	}
+	printf("madongseok: %d (aggro: %d -> %d, stamina: %d -> %d)", madongseok, pre_madongseok_aggro, madongseok_aggro);
+}
+// 7-3) 마동석 도발 함수 (1을 입력 받았을 때)
 int madongseok_action_1_func() {
 	printf("madongseok provoked zomebie...\n");
 	pre_madongseok_aggro = madongseok_aggro;
@@ -247,21 +317,68 @@ int madongseok_action_1_func() {
 	printf("madongseok : %d (aggro: %d -> %d, stamina: %d\n", madongseok, pre_madongseok_aggro, madongseok_aggro, madongseok_stamina);
 }
 
-// 7-3) 마동석 행동 메인 함수 
+// 7-4) 마동석 붙들기 함수 (2를 입력 받았을 때)
+int madongseok_action_2_func() {
+	if (100 - p > rand()) {
+		zombie_move_or_not = 0; // 마동석이 좀비 붙들기에 성공했을 때 좀비가 못 움직이게 하기 위한 변수 
+		printf("madongseok pulled zombie... Next turn, it can't move\n");
+		madongseok_aggro_max_func();
+	}
+	else {
+		zombie_move_or_not = 1; // 마동석이 좀비 붙들기에 실패했을 때 좀비가 움직이게 하기 위한 변수
+		printf("madongseok failed to pull zombie");
+		madongseok_aggro_max_func(); 
+	}
+}
+
+// 7-5) 마동석 행동 입력 받았을 때 실행시킬 함수
+int madongseok_action_start_func() {
+	if (madongseok_action == 0) { // 0을 입력 받았을 때
+		madongseok_action_0_func();  // 마동석 휴식 함수 불러오기
+	}
+	else if (madongseok_action == 1) { // 1을 입력 받았을 때
+		madongseok_action_1_func(); // 마동석 도발 함수 불러오기
+	}
+	else if (madongseok_action == 2) { // 2를 입력 받았을 때
+		madongseok_action_2_func(); //마동석 붙들기 함수 불러오기
+	}
+	else {
+
+	}
+}
+// 7-6) 마동석 (좀비와 인접한 경우) 행동 규칙 함수
+int madongseok_action_withzombie_func() {
+	while (1) {
+		printf("madongseok action(0. rest, 1.provoke, 2.pull)>>");
+		scanf_s("%d", &madongseok_action);
+		if (madongseok_action > 2 && madongseok_action < 0) {
+			continue;
+		}
+		else {
+			madongseok_action_start_func();
+			break;
+		}
+	}
+}
+
+// 7-7) 마동석 행동 메인 함수 
 int madongseok_action_func() {
 	printf("citizen does nothing.");
 	printf("zombie attacked nobody.");
+	// 유효한 값이 입력될 때까지 무한 반복
 	while (1) {
 		printf("madongseok action(0.rest, 1.provoke)>>");
 		scanf_s("%d", &madongseok_action);
-		if (madongseok_action == 0 || madongseok_action == 1) {
-			if (madongseok_action == 0) {
-				madongseok_action_0_func();
-				break;
-			}
-			else {
-				madongseok_action_1_func();
-				break;
+		if (zombie + 1 != madongseok) {
+			if (madongseok_action == MOVE_STAY || madongseok_action == MOVE_LEFT) { // 0 또는 1을 입력했을 때
+				if (madongseok_action == MOVE_STAY) { // 0을 입력했을 때 
+					madongseok_action_0_func(); // 마동석 휴식 함수 불러오기
+					break;
+				}
+				else { // 1을 입력했을 때
+					madongseok_action_1_func(); // 마동석 도발 함수 불러오기
+					break;
+				}
 			}
 		}
 	}
