@@ -389,18 +389,4 @@ int madongseok_action_func() {
 // --<< 메인 코드 작성 >>--
 int main(void) {
 	srand((unsigned int)time(NULL)); 
-	train_length_func(); // 기차 함수 불러오기
-	madongseok_stamina_func(); // 마동석 체력 함수 불러오기
-	probability_func(); // 확률 함수 불러오기
-	train_shape_first_third_func(); // 기차 (첫째 줄) 초기 상태 불러오기
-	train_shape_second_func(); // 기차 (둘째 줄) 초기 상태 불러오기
-	// < 무한 루프 >
-	train_shape_first_third_func(); // 기차 (첫째 줄) 상태 불러오기
-	train_shape_second_func(); // 기차 (둘째 줄) 상태 불러오기
-	train_shape_first_third_func(); // 기차 (셋째 줄) 상태 불러오기
-	// 확률 함수
-	C_Z_move_func(); // 시민(어그로 포함) 좀비 이동 상태 불러오기
-	madongseok_move_func(); // 마동석 이동 함수 불러오기
-
-
 } 
