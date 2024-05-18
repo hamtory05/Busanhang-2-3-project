@@ -483,12 +483,7 @@ int main(void) {
 
 		// citizen_move_func() 으로 인해 시민이 움직였을 경우 or 안 움직였을 경우
 		if (citizen == pre_citizen) { // 시민이 움직이지 않았을 때
-			if (citizen_aggro == AGGRO_MIN) { // 시민 어그로가 0일 때
-				printf("citizen: stay %d (aggro: %d)\n", citizen, citizen_aggro);
-			}
-			else { // 시민 어그로가 0이 아닐 때
-				printf("citizen: stay %d (aggro: %d -> %d)\n", citizen, pre_citizen_aggro, citizen_aggro);
-			}
+			printf("citizen dose nothing.\n");
 		}
 		else { // 시민이 움직였을 때
 			printf("citizen: %d -> %d (aggro: %d -> %d)\n", pre_citizen, citizen, pre_citizen_aggro, citizen_aggro);
@@ -496,7 +491,7 @@ int main(void) {
 
 		// zombie_move_func() 으로 인해 좀비가 움직였을 경우 or 안 움직였을 경우
 		if (zombie == pre_zombie) {
-			printf("zombie: stay %d\n", zombie);
+			printf("zombie attacked nobody.\n");
 		}
 		else {
 			printf("zombie: %d -> %d\n", pre_zombie, zombie);
@@ -509,8 +504,11 @@ int main(void) {
 		if (madongseok_move == 0) { // 0을 입력받았을 때
 			madongseok_move_0_func(); 
 		}
-		else{ // 1를 입력 받았을 때
+		else if (madongseok_move == 1) { // 1를 입력 받았을 때
 			madongseok_move_1_func();
+		}
+		else {
+
 		}
 
 
