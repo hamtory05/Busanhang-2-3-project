@@ -199,7 +199,7 @@ int zombie_move_or_not_func(); //  마동석이 좀비 붙들기에 성공했을
 int zombie_move_citizen_func(); // 좀비 -> 시민 이동 함수
 int zombie_move_madongseok_func(); // 좀비 -> 마동석 이동 함수
 int citizen_aggro_biggerthan_madongseok_func(); // 시민 어그로가 마동석 어그로보다 클 때
-int madongseok_aggro_biggerthan_citizen_func(); // 마동석 어그로가 시민 어그로보다 클 때
+int madongseok_aggro_biggerthan_citizen_func(); // 마동석 어그로가 시민 어그로보다 클 때 
 
 // [ PDF 2-3 <이동> & 2-3 <이동>: 예외처리 ]
 // 6-1) 시민 이동 (왼쪽 한칸) 함수
@@ -495,10 +495,10 @@ int main(void) {
 	while (1) {
 		r = rand() % 101; // 시민 난수 출력
 		k = rand() % 101; // 마동석 난수 출력
-		zombie_move_func();
-		citizen_move_func();
+		citizen_move_func(); // 시민 이동 함수 불러오기
+		zombie_move_func(); // 좀비 이동 함수 불러오기
 		printf("\n");
-		train_shape_main_func();
+		train_shape_main_func(); // 기차 상태 불러오기
 		printf("\n");
 
 		// citizen_move_func() 으로 인해 시민이 움직였을 경우 or 안 움직였을 경우
@@ -516,10 +516,10 @@ int main(void) {
 
 		// zombie_move_func() 으로 인해 좀비가 움직였을 경우 or 안 움직였을 경우
 		if (zombie_move_or_not == 1) { // 마동석이 붙들기 함수에서 실패했을 때
-			if (zombie == pre_zombie) {
+			if (zombie == pre_zombie) { // 좀비가 그 자리에 있을 때
 				printf("zombie: stay %d\n", zombie);
 			}
-			else {
+			else { // 좀비가 움직였을때
 				printf("zombie: %d -> %d\n", pre_zombie, zombie);
 			}
 		}
