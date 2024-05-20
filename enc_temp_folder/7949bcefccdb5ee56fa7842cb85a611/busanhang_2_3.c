@@ -52,7 +52,7 @@ int madongseok_move; // 마동석 이동
 int phase = 1; // 턴, 페이즈
 int madongseok_action; // 마동석 행동
 int zombie_move_or_not = 1; // 좀비가 마동석의 붙잡기에 따라 움직일지 안 움직일지 정하기
-int r, k; // 시민, 마동석 난수 
+int r, k;
 int villain; // 빌런
 int pre_villain; // 빌런 (전) 상태
 int j; // 빌런 난수 
@@ -620,14 +620,12 @@ int busanhang2_func() {
 
 // --<< 부산헹(3) [ PDF 3-2 ] 추가된 전역 변수 >>--
 
-// [ 부산헹(2) 함수들 안에 쓰여서 맨 위에다가 변수 선언을 하였음. ]
 // int villain; // 빌런
 // int pre_villain; // 빌런 (전) 상태
 // int j; // 빌런 난수 
 // int villain_aggro; // 빌런 어그로
 // int villain_pre_aggro; // 빌런 (전) 어그로 상태
 // int villain_dead = 0; // 빌런이 죽었을 때 주어지는 변수 값
-
 
 // --<< 부산헹(3) [ PDF 3-2 ] 추가된 함수 정리 >>--
 
@@ -890,7 +888,7 @@ int citizen_2_aggro; // 시민 2 어그로
 int pre_citizen_2_aggro; // 시민 2 (전) 어그로
 int citizen_3_aggro; // 시민 3 어그로
 int pre_citizen_3_aggro; // 시민 3 (전) 어그로
-int h, g; // 시민 2, 3 난수
+
 
 // --<< 부산헹(3) [ PDF 3-3 ] 추가된 함수 정리 >>--
 
@@ -951,10 +949,10 @@ int BSH3_3_train_shape_second_func() {
 		else if (i == citizen) { // 시민 1
 			printf("C");
 		}
-		else if (i == h) { // 시민 2
+		else if (i == citizen_2) { // 시민 2
 			printf("C");
 		}
-		else if (i == g) { // 시민 3
+		else if (i == citizen_3) { // 시민 3
 			printf("C");
 		}
 		else if (i == villain && villain_dead == 0) {
@@ -1000,17 +998,7 @@ int busanhang3_3_func() {
 		k = rand() % 101; // 마동석 난수 출력
 		j = 30; // 빌런 발암 시도 확률
 
-		// 시민 2, 3 난수가 다를 때까지 무한 반복
-		while (1) {
-			if (h == g) { // 만약 시민 2, 3 자리가 같다면 다시 난수 출력
-				h = rand() % ((train_length / 2) - (train_length / 4 + 1)) + (train_length / 4); // 기차 길이가 20일 때 6 + 5 -> 5 ~ 10까지
-				g = rand() % ((train_length / 2) - (train_length / 4 + 1)) + (train_length / 4); // 기차 길이가 20일 때 6 + 5 -> 5 ~ 10까지 
-			}
-			else { // 같지 않으면 무한 반복 빠져나오기
-				break;
-			}
-		}
-		// 시민 이동 함수부터 해야댐 !
+
 
 
 	}
