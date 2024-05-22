@@ -49,7 +49,7 @@ int pre_citizen_aggro; // 시민 1 (전) 어그로
 int madongseok_aggro = 1; // 마동석 어그로
 int pre_madongseok_aggro; // 마동석 (전) 어그로
 int madongseok_move; // 마동석 이동
-int phase = 1; // 턴, 페이즈
+int phase = 1; // 턴
 int madongseok_action; // 마동석 행동
 int zombie_move_or_not = 1; // 좀비가 마동석의 붙잡기에 따라 움직일지 안 움직일지 정하기
 int r, k; // 시민, 마동석 난수 
@@ -241,6 +241,7 @@ int citizen_move_left_func(); // 시민 이동 (왼쪽 한칸) 함수
 int citizen_move_stay_func(); // 시민 이동 (왼쪽 한칸 X) 함수
 int citizen_move_or_nomove_func(); // 시민이 citizen_move_func() 으로 움직였을 때 또는 안 움직였을 때
 int zombie_move_func(); // 좀비 이동 함수
+int zombie_cannot_move_func(); // 좀비 이동(X) 함수
 int zombie_move_or_not_func(); //  마동석이 좀비 붙들기에 성공했을때 or 실패했을 때의 좀비 이동 상태 함수
 int zombie_move_or_nomove_func(); // 좀비가 zombie_move_func() 으로 움직였을 때 또는 안 움직였을 때
 int zombie_move_citizen_func(); // 좀비 -> 시민 이동 함수
@@ -251,6 +252,7 @@ void citizen_stay_message_func(); // 시민이 움직이지 않았을 때 출력
 void citizen_move_message_func(); // 시민이 움직였을 때 출력되는 메세지
 void zombie_stay_message_func(); // 좀비가 움직이지 않았을 때 출력되는 메세지
 void zombie_move_message_func(); // 좀비가 움직였을 때 출력되는 메세지
+void zombie_cannot_move_message_func(); // 좀비가 움직일 수 없는 턴일 때 출력되는 메세지
 
 // [ PDF 2-3 <이동> & 2-3 <이동>: 예외처리 ]
 // 6-0) 입력 메세지 모음
@@ -272,6 +274,10 @@ void zombie_stay_message_func() {
 
 void zombie_move_message_func() {
 	printf("zombie: %d -> %d\n", pre_zombie, zombie);
+}
+
+void zombie_cannot_move_message_func() {
+	printf("zombie cannot move this turn\n");
 }
 
 // [ PDF 2-3 <이동> & 2-3 <이동>: 예외처리 ]
@@ -346,39 +352,54 @@ int citizen_move_or_nomove_func() {
 // 6-7) 좀비 이동 함수
 int zombie_move_func() {
 	if (phase % 2 == 1) { // 턴이 홀수일 때 (즉, 2턴마다)
-		if (citizen_aggro > madongseok_aggro) { // 시민 어그로가 마동석 어그로보다 클 때
-			zombie_move_citizen_func();
+		if (zombie_move_or_not == 1) { // 마동석이 붙들기에 실패했을 때
+			if (citizen_aggro > madongseok_aggro) { // 시민 어그로가 마동석 어그로보다 클 때
+				zombie_move_citizen_func();
 
-		}
-		else if (madongseok_aggro > citizen_aggro) { // 마동석 어그로가 시민 어그로보다 클 때
-			zombie_move_madongseok_func();
+			}
+			else if (madongseok_aggro > citizen_aggro) { // 마동석 어그로가 시민 어그로보다 클 때
+				zombie_move_madongseok_func();
 
-		}
-		else { // 시민 어그로와 마동석 어그로가 같을 때
-			zombie_move_citizen_func();
+			}
+			else { // 시민 어그로와 마동석 어그로가 같을 때
+				zombie_move_citizen_func();
 
+			}
 		}
 	}
-}
-
-// [ PDF 2-3 < 이동 > & 2-3 < 이동 > :예외처리 ]
-// 6-8) zombie_move_func()으로 좀비가 움직였을 때 또는 안 움직였을 때
-int zombie_move_or_nomove_func() {
-	if (zombie_move_or_not == 1) { // 마동석이 붙들기 함수에서 실패했을 때
-		if (zombie == pre_zombie) { // 좀비가 그 자리에 있을 때
-			zombie_stay_message_func();
-		}
-		else { // 좀비가 움직였을때
-			zombie_move_message_func();
-		}
-	}
-	else { // 마동석이 붙들기 함수에서 성공했을 때
-		zombie_stay_message_func();
+	else { // 짝수턴일 때
+		
 	}
 }
 
 // [ PDF 2-4 <행동> & 2-4 <행동> : 예외처리 ]
-// 6-9) 마동석이 좀비 붙들기에 성공했을때 or 실패했을 때의 좀비 이동 상태 함수
+// 6-8) 좀비 이동(X) 함수 -> 만들 필요는 없지만 시민 이동 출력하는거랑 같이 출력하게 하기 위해서 어쩔수없이 따로 만들었음.
+int zombie_cannot_move_func() {
+	if (phase % 2 == 0) {
+		zombie_cannot_move_message_func();
+	}
+}
+
+// [ PDF 2-3 < 이동 > & 2-3 < 이동 > :예외처리 ]
+// 6-9) zombie_move_func()으로 좀비가 움직였을 때 또는 안 움직였을 때
+int zombie_move_or_nomove_func() {
+	if (phase % 2 == 1) { // 홀수턴일때
+		if (zombie_move_or_not == 1) { // 마동석이 붙들기 함수에서 실패했을 때
+			if (zombie == pre_zombie) { // 좀비가 그 자리에 있을 때
+				zombie_stay_message_func();
+			}
+			else { // 좀비가 움직였을때
+				zombie_move_message_func();
+			}
+		}
+		else { // 마동석이 붙들기 함수에서 성공했을 때
+			zombie_cannot_move_message_func();
+		}
+	}
+}
+
+// [ PDF 2-4 <행동> & 2-4 <행동> : 예외처리 ]
+// 6-10) 마동석이 좀비 붙들기에 성공했을때 or 실패했을 때의 좀비 이동 상태 함수
 int zombie_move_or_not_func() {
 	if (zombie_move_or_not == 0) { // 좀비 붙들기에 성공했을 때
 		phase = 1; // 턴을 강제로 홀수로 변경 -> 홀수로 바뀌고 메인 코드 마지막 +1 되면서 담턴에 좀비가 못 움직이게 됨.
@@ -391,7 +412,7 @@ int zombie_move_or_not_func() {
 
 
 // [ PDF 2-3 < 이동 > & 2-3 < 이동 > :예외처리 ], [ PDF 2-4 <행동> & 2-4 <행동> : 예외처리 ]
-// 6-10) 좀비 -> 마동석 이동 함수
+// 6-11) 좀비 -> 마동석 이동 함수
 int zombie_move_madongseok_func() {
 	// 마동석이 좀비 붙들기를 성공했을 때 (좀비 이동 불가)
 	zombie_move_or_not_func();
@@ -406,7 +427,7 @@ int zombie_move_madongseok_func() {
 }
 
 // [ PDF 2-3 < 이동 > & 2-3 < 이동 > :예외처리 ], [ PDF 2-4 <행동> & 2-4 <행동> : 예외처리 ]
-// 6-11) 좀비 -> 시민 이동 함수
+// 6-12) 좀비 -> 시민 이동 함수
 int zombie_move_citizen_func() {
 	// 마동석이 좀비 붙들기를 성공했을 때 (좀비 이동 불가)
 	zombie_move_or_not_func();
@@ -760,7 +781,8 @@ int busanhang2_func() {
 		citizen_move_or_nomove_func();
 
 		// zombie_move_func() 으로 인해 좀비가 움직였을 경우 or 안 움직였을 경우
-		zombie_move_or_nomove_func();
+		zombie_move_or_nomove_func(); // 홀수턴일때
+		zombie_cannot_move_func(); // 짝수턴일때
 
 		printf("\n");
 		madongseok_move_func(); // 마동석 이동 결정 함수
@@ -1056,7 +1078,8 @@ int busanhang3_2_func() {
 		villain_move_or_nomove_func();
 
 		// zombie_move_func() 으로 인해 좀비가 움직였을 경우 or 안 움직였을 경우
-		zombie_move_or_nomove_func();
+		zombie_move_or_nomove_func(); // 홀수턴
+		zombie_cannot_move_func(); // 짝수턴
 
 		printf("\n");
 		madongseok_move_func(); // 마동석 이동 결정 함수
@@ -1584,7 +1607,8 @@ int busanhang3_3_func() {
 		villain_move_or_nomove_func(); 
 
 		// zombie_move_func() 으로 인해 좀비가 움직였을 경우 or 안 움직였을 경우
-		zombie_move_or_nomove_func(); 
+		zombie_move_or_nomove_func(); // 홀수턴
+		zombie_cannot_move_func(); // 짝수턴
 
 		printf("\n");
 		madongseok_move_func(); // 마동석 이동 결정 함수
@@ -1699,9 +1723,9 @@ int main(void) {
 	// -< 메인 코드 초기 부분 >-
 	srand((unsigned int)time(NULL)); // 무작위 랜덤 난수
 	// -< 메인 코드 메인 부분 >-
-	//busanhang2_func(); // 부산헹(2) 함수 불러오기
+	busanhang2_func(); // 부산헹(2) 함수 불러오기
 	//busanhang3_2_func(); // 부산헹(3-2) 함수 불러오기 0
-	busanhang3_3_func();
+	//busanhang3_3_func();
 	return 0;
 
 } // <- int main(void) 중괄호
