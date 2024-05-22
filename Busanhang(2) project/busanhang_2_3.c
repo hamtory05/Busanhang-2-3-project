@@ -1607,18 +1607,34 @@ int busanhang3_3_func() {
 		// 좀비 공격으로 시민 1, 2, 3 또는 빌런 또는 마동석이 죽었을 때
 		citizen_1_2_3_villain_madongseok_dead_func();
 
+		// 시민 몇 명 살아있는지 
 		printf("%d citizen(s) alive(s).\n", citizen_all_dead);
 
+		// 시민이 한명 이상 탈출했을 때
+		if (citizen_all_safe > 0) {
+			printf("GAME CLEAR! %d citizen safe !!", citizen_all_safe);
+			break;
+		}
+		// 시민이 다 죽었을 때
+		if (citizen_dead == 0) {
+			printf("GAME OVER! %d citizen dead...", citizen_all_dead);
+			break;
+		}
 
+		// 좀비 공격으로 시민 또는 빌런 또는 마동석이 죽었을 때
+		citizen_madongseok_villain_dead_func();
 
+		// 좀비 공격으로 마동석이 죽었을 때
+		if (madongseok_dead == 1) {
+			break;
+		}
 
 		// 마동석 행동 여부
 		madongseok_action_yesorno_func();
 		//
 		phase += 1; // 턴을 1 증가시킨다.
-
-
 	}
+
 }
 
 
