@@ -1143,7 +1143,7 @@ int citizens_make_func() {
 	for (int i = 0; i < citizens_number; i++) {
 		int same;
 		while (1) {
-			citizens_number_select_list[i] = rand() % (train_length - 5) + 1;
+			citizens_number_select_list[i] = rand() % (train_length - 6) + 1;
 			same = 1; // 중복 여부 
 
 			// 중복 검사
@@ -1177,20 +1177,16 @@ int citizens_move_func() {
 				}
 			}
 			if (citizens_can_move == 1) { // 시민이 움직였을 때
-				pre_citizens = citizens_number_select_list[i];
 				citizens_number_select_list[i] -= 1; // 시민 - 1
-				pre_citizens_aggro = citizens_aggro_list[i];
-				now_citizens_aggro = citizens_aggro_list[i] += 1; // 시민 어그로 + 1 
+				citizens_aggro_list[i] += 1; // 시민 어그로 + 1 
 				citizens_move_list[i] = 1;
 			}
 			else {
-				pre_citizens_aggro = citizens_aggro_list[i];
-				now_citizens_aggro = citizens_aggro_list[i] -= 1; // 시민 어그로 - 1
+				citizens_aggro_list[i] -= 1; // 시민 어그로 - 1
 			}
 		}
 		else { // 시민이 움직이지 않았을 때
-			pre_citizens_aggro = citizens_aggro_list[i];
-			now_citizens_aggro = citizens_aggro_list[i] -= 1;
+			citizens_aggro_list[i] -= 1;
 		}
 	}
 }
@@ -1201,11 +1197,11 @@ int citizens_move_or_nomove_func() {
 	for (int i = 0; i < citizens_number; i++) {
 		if (citizens_move_list[i] == 1) {
 			// 이동 상태 출력
-			printf("citizen: %d -> %d, aggro: %d -> %d\n", pre_citizens, now_citizens, pre_citizens_aggro, now_citizens_aggro);
+			printf("citizen %d: %d -> %d (aggro: %d -> %d)\n", i + 1, citizens_number_select_list[i] + 1, citizens_number_select_list[i], citizens_aggro_list[i] - 1, citizens_aggro_list[i]);
 		}
 		else {
 			// 이동하지 못한 상태 출력
-			printf("citizen stay: %d  aggro: %d -> %d\n", now_citizens, pre_citizens_aggro, now_citizens_aggro);
+			printf("citizen %d stay: %d (aggro: %d -> %d)\n", i + 1, citizens_number_select_list[i], citizens_aggro_list[i] + 1, citizens_aggro_list[i]);
 		}
 	}
 }
@@ -1249,9 +1245,11 @@ int BSH3_3_train_shape_first_third_func() {
 // 3-2) 기차 둘째 줄
 int BSH3_3_train_shape_second_func() {
 	for (int i = 0; i < train_length; i++) {
+		int citizens_put_in = 0; // 시민들 자리에 왔을 때 +1을 해주기 위한 변수
 		for (int j = 0; j < citizens_number; j++) {
 			if (citizens_number_select_list[j] == i) { 
-				printf("C");
+				citizens_put_in = 1;
+				break;
 			}
 		}
 		// 기차의 처음과 끝을 '#' 으로 마무리
@@ -1259,6 +1257,9 @@ int BSH3_3_train_shape_second_func() {
 			printf("#");
 		}
 		else if (i == citizen) { // 시민 1
+			printf("C");
+		}
+		else if (citizens_put_in == 1) {
 			printf("C");
 		}
 		else if (i == zombie) {
