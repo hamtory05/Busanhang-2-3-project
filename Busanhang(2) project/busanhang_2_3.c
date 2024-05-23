@@ -1123,35 +1123,33 @@ int busanhang3_2_func() {
 
 
 // --<< 부산헹(3) [ PDF 3-3 ] 추가된 전역 변수 >>--
-int citizen_2; // 시민 2
-int pre_citizen_2; // 시민 2 (전) 상태
-int citizen_3; // 시민 3
-int pre_citizen_3; // 시민 3 (전) 상태
-int citizen_2_aggro; // 시민 2 어그로
-int pre_citizen_2_aggro; // 시민 2 (전) 어그로
-int citizen_3_aggro; // 시민 3 어그로
-int pre_citizen_3_aggro; // 시민 3 (전) 어그로
-int citizen_all_dead = 3; // 시민이 죽을 때마다 -1 카운트 되는 변수
-int citizen_all_safe = 0; // 시민이 탈출할 때마다 +1 카운트 되는 변수
-int citizen_2_dead = 0; // 시민 2이 죽었을 때 +1 카운트 되는 변수
-int citizen_3_dead = 0; // 시민 3이 죽었을 때 +1 카운트 되는 변수
-int citizen_count = 3; // 시민이 탈출하거나 죽었을 때 -1 되는 변수
-int citizen_number; // 시민 생성 수
-int citizen_number_select_list[LEN_MAX] = { 0 };
+int citizens_number; // 시민 생성 수
+int citizens_number_select_list[LEN_MAX] = { 0 }; // 시민 생성 및 위치 배열
+int citizens_aggro_list[LEN_MAX] = { 0 }; // 시민 어그로 배열
+int citizens_move_list[LEN_MAX] = { 0 }; // 시민이 움직였는지 여부를 판단하는 배열
+int pre_citizens;
+int now_citizens;
+int pre_citizens_aggro;
+int now_citizens_aggro;
+int citizens_can_move; // 시민들 이동 가능 여부
 
-// 시민 생성 및 위치 함수
-int citizen_make_func();
-int citizen_make_func() {
-	for (int i = 0; i < citizen_number; i++) {
+
+
+// --<< 부산헹(3) [ PDF 3-3 ] 추가된 함수 정리 >>--
+
+// 시민들 생성 및 위치 함수
+int citizens_make_func();
+int citizens_make_func() {
+	for (int i = 0; i < citizens_number; i++) {
 		int same;
 		while (1) {
-			citizen_number_select_list[i] = rand() % (train_length - 5) + 1;
-			same = 1; // 중복 여부 초기화
+			citizens_number_select_list[i] = rand() % (train_length - 5) + 1;
+			same = 1; // 중복 여부 
 
 			// 중복 검사
 			for (int j = 0; j < i; j++) {
-				if (citizen_number_select_list[i] == citizen_number_select_list[j]) {
-					same = 0; // 중복 발견
+				if (citizens_number_select_list[i] == citizens_number_select_list[j]) {
+					same = 0; // 중복이 있을 때
 					break;
 				}
 			}
@@ -1164,21 +1162,61 @@ int citizen_make_func() {
 	}
 }
 
+// 시민들 이동 함수
+int citizens_move_func();
+int citizens_move_func() {
+	for (int i = 0; i < citizens_number; i++) {
+		int citizens_r = rand() % 101;
+		citizens_move_list[i] = 0; // 시민이 움직이지 않았을 때의 배열
+		if (100 - p >= citizens_r) { // 시민이 움직일 때
+			citizens_can_move = 1; // 시민이 움직일 수 있을 때 시민 이동 여부를 1로 정하기
+			for (int j = 0; j < citizens_number; j++) {
+				if (i != j && citizens_number_select_list[j] == citizens_number_select_list[i] - 1) { // 만약 시민 -1을 해야되는데 옆에 시민이 있을 때
+					citizens_can_move = 0; // 시민 이동 여부를 0으로 정하기
+					break;
+				}
+			}
+			if (citizens_can_move == 1) { // 시민이 움직였을 때
+				pre_citizens = citizens_number_select_list[i];
+				citizens_number_select_list[i] -= 1; // 시민 - 1
+				pre_citizens_aggro = citizens_aggro_list[i];
+				now_citizens_aggro = citizens_aggro_list[i] += 1; // 시민 어그로 + 1 
+				citizens_move_list[i] = 1;
+			}
+			else {
+				pre_citizens_aggro = citizens_aggro_list[i];
+				now_citizens_aggro = citizens_aggro_list[i] -= 1; // 시민 어그로 - 1
+			}
+		}
+		else { // 시민이 움직이지 않았을 때
+			pre_citizens_aggro = citizens_aggro_list[i];
+			now_citizens_aggro = citizens_aggro_list[i] -= 1;
+		}
+	}
+}
 
-// --<< 부산헹(3) [ PDF 3-3 ] 추가된 함수 정리 >>--
+// citizens_move_func()으로 시민들이 움직였을 경우 or 안 움직였을 경우
+int citizens_move_or_nomove_func();
+int citizens_move_or_nomove_func() {
+	for (int i = 0; i < citizens_number; i++) {
+		if (citizens_move_list[i] == 1) {
+			// 이동 상태 출력
+			printf("citizen: %d -> %d, aggro: %d -> %d\n", pre_citizens, now_citizens, pre_citizens_aggro, now_citizens_aggro);
+		}
+		else {
+			// 이동하지 못한 상태 출력
+			printf("citizen stay: %d  aggro: %d -> %d\n", now_citizens, pre_citizens_aggro, now_citizens_aggro);
+		}
+	}
+}
 
-// 1) 마동석 시민 1, 2, 3, 빌런, 좀비 초기 위치 설정 함수
+// 1) 마동석 시민, 빌런, 좀비 초기 위치 설정 함수
 int character_func();
 int character_func() {
 	madongseok = train_length - 2;
 	zombie = train_length - 3;
-	citizen = train_length - 6; // 시민 1
+	citizen = train_length - 6; // 시민
 	pre_citizen = citizen;
-	villain = train_length - 5;
-	pre_villain = villain;
-	pre_zombie = zombie;
-	pre_madongseok = madongseok;
-	return madongseok, pre_madongseok, zombie, pre_zombie, citizen, citizen_2, citizen_3, pre_citizen, pre_citizen_2, pre_citizen_3, villain, pre_villain;
 }
 
 // 2) 기차 길이 (입력 및 예외처리) 함수 선언
@@ -1211,8 +1249,8 @@ int BSH3_3_train_shape_first_third_func() {
 // 3-2) 기차 둘째 줄
 int BSH3_3_train_shape_second_func() {
 	for (int i = 0; i < train_length; i++) {
-		for (int j = 0; j < citizen_number; j++) {
-			if (citizen_number_select_list[j] == i) { 
+		for (int j = 0; j < citizens_number; j++) {
+			if (citizens_number_select_list[j] == i) { 
 				printf("C");
 			}
 		}
@@ -1222,9 +1260,6 @@ int BSH3_3_train_shape_second_func() {
 		}
 		else if (i == citizen) { // 시민 1
 			printf("C");
-		}
-		else if (i == villain && villain_dead == 0) {
-			printf("V");
 		}
 		else if (i == zombie) {
 			printf("Z");
@@ -1246,7 +1281,7 @@ int BSH3_3_train_shape_main_func() {
 	BSH3_3_train_shape_first_third_func();
 }
 
-// 4) 시민 1, 2, 3 이동 함수 선언 & 시민 탈출 & 마동석. 시민(1, 2, 3), 빌런 어그로 관계 함수 선언
+
 
 // --<<<   부산헹(3) [ PDF 3-3. 스테이지3: 시민'들' ]  >>>--
 int busanhang3_3_func();
@@ -1255,9 +1290,10 @@ int busanhang3_3_func() {
 	BSH3_3_train_length_func();
 
 	// 시민 생성 수
-	citizen_number = rand() % ((train_length / 2 + 1) - (train_length / 4)) + (train_length / 4); // 기차 길이가 20일 때 6 + 5 -> 5 ~ 10 명의 시민을 생성함.
+	citizens_number = rand() % ((train_length / 2 + 1) - (train_length / 4)) + (train_length / 4); // 기차 길이가 20일 때 6 + 5 -> 5 ~ 10 명의 시민을 생성함.
 
-	character_func(); // * 마동석, 시민 1, 2, 3, 빌런, 좀비 초기 위치 설정 *
+	citizens_make_func(); // 시민 생성 및 위치 함수
+	character_func(); // * 마동석, 시민, 좀비 초기 위치 설정 *
 	madongseok_stamina_func(); // 마동석 체력 (예외처리 O) 함수 불러오기
 	probability_func(); // 확률 입력 (예외처리 O) 함수 불러오기
 	printf("\n");
@@ -1269,31 +1305,30 @@ int busanhang3_3_func() {
 	while (1) {
 		r = rand() % 101; // 시민 난수 출력
 		k = rand() % 101; // 마동석 난수 출력
-		j = 30; // 빌런 발암 시도 확률
-
 		
-		villain_move_func(); // 빌런 이동 함수 불러오기
+		citizen_move_func(); // 시민 움직이는 함수 불러오기
+		citizens_move_func(); // 시민들 움직이는 함수 불러오기
 		zombie_move_func(); // 좀비 이동 함수 불러오기
 		printf("\n");
 		BSH3_3_train_shape_main_func(); // 기차 상태 불러오기
 		printf("\n");
 
-		
-		// villain_move_func() 으로 인해 빌런이 움직였을 경우 or 안 움직였을 경우
-		villain_move_or_nomove_func(); 
-
+		// citizen_move_func으로 시민이 움직였을 때 or 안 움직였을 경우
+		citizen_move_or_nomove_func();
+		//  citizens_move_func()으로 시민들이 움직였을 때 or 안 움직였을 경우
+		citizens_move_or_nomove_func();
 		// zombie_move_func() 으로 인해 좀비가 움직였을 경우 or 안 움직였을 경우
 		zombie_move_or_nomove_func(); // 홀수턴
 		zombie_cannot_move_func(); // 짝수턴
 
 		printf("\n");
-		madongseok_move_func(); // 마동석 이동 결정 함수
+		//madongseok_move_func(); // 마동석 이동 결정 함수
 		printf("\n");
-		BSH3_3_train_shape_main_func(); // 기차 상태 출력 함수
+		//BSH3_3_train_shape_main_func(); // 기차 상태 출력 함수
 		printf("\n\n");
 
 		// 마동석 이동
-		madongseok_move_main_func();
+		//madongseok_move_main_func();
 
 		printf("\n");
 
@@ -1304,7 +1339,7 @@ int busanhang3_3_func() {
 		}
 
 		// 마동석 행동 여부
-		madongseok_action_yesorno_func();
+		//madongseok_action_yesorno_func();
 		//
 		phase += 1; // 턴을 1 증가시킨다.
 	}
