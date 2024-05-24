@@ -1166,33 +1166,35 @@ void citizens_move_func() {
 	for (int i = 0; i < citizens_number; i++) {
 		int citizens_r = rand() % 101;
 		citizens_move_list[i] = 0; // 시민이 움직이지 않았을 때의 배열
-		if (100 - p >= citizens_r) { // 시민이 움직일 때
-			citizens_can_move = 1; // 시민이 움직일 수 있을 때 시민 이동 여부를 1로 정하기
-			for (int j = 0; j < citizens_number; j++) {
-				if (i != j && citizens_number_select_list[j] == citizens_number_select_list[i] - 1) { // 만약 시민 -1을 해야되는데 옆에 시민이 있을 때
-					citizens_can_move = 0; // 시민 이동 여부를 0으로 정하기
-					break;
+		if (citizens_safe_list[i] != 1) {
+			if (100 - p >= citizens_r) { // 시민이 움직일 때
+				citizens_can_move = 1; // 시민이 움직일 수 있을 때 시민 이동 여부를 1로 정하기
+				for (int j = 0; j < citizens_number; j++) {
+					if (i != j && citizens_number_select_list[j] == citizens_number_select_list[i] - 1) { // 만약 시민 -1을 해야되는데 옆에 시민이 있을 때
+						citizens_can_move = 0; // 시민 이동 여부를 0으로 정하기
+						break;
+					}
+				}
+				if (citizens_can_move == 1) { // 시민이 움직였을 때
+					citizens_number_select_list[i] -= 1; // 시민 - 1
+					citizens_aggro_list[i] += 1; // 시민 어그로 + 1 
+					if (citizens_aggro_list[i] >= STM_MAX) {
+						citizens_aggro_list[i] = STM_MAX;
+					}
+					citizens_move_list[i] = 1;
+				}
+				else {
+					citizens_aggro_list[i] -= 1; // 시민 어그로 - 1
+					if (citizens_aggro_list[i] <= STM_MIN) {
+						citizens_aggro_list[i] = STM_MIN;
+					}
 				}
 			}
-			if (citizens_can_move == 1) { // 시민이 움직였을 때
-				citizens_number_select_list[i] -= 1; // 시민 - 1
-				citizens_aggro_list[i] += 1; // 시민 어그로 + 1 
-				if (citizens_aggro_list[i] >= STM_MAX) {
-					citizens_aggro_list[i] = STM_MAX;
-				}
-				citizens_move_list[i] = 1;
-			}
-			else {
-				citizens_aggro_list[i] -= 1; // 시민 어그로 - 1
+			else { // 시민이 움직이지 않았을 때
+				citizens_aggro_list[i] -= 1;
 				if (citizens_aggro_list[i] <= STM_MIN) {
 					citizens_aggro_list[i] = STM_MIN;
 				}
-			}
-		}
-		else { // 시민이 움직이지 않았을 때
-			citizens_aggro_list[i] -= 1;
-			if (citizens_aggro_list[i] <= STM_MIN) {
-				citizens_aggro_list[i] = STM_MIN;
 			}
 		}
 	}
