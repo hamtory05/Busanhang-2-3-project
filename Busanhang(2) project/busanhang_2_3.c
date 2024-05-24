@@ -1128,7 +1128,9 @@ int citizens_number_select_list[LEN_MAX] = { 0 }; // 시민 생성 및 위치 �
 int citizens_aggro_list[LEN_MAX] = { 0 }; // 시민 어그로 배열
 int citizens_move_list[LEN_MAX] = { 0 }; // 시민이 움직였는지 여부를 판단하는 배열
 int citizens_safe_list[LEN_MAX] = { 0 }; // 시민이 탈출했을 때 +1 되는 배열
+int citizens_safe_or_dead_list[LEN_MAX] = { 0 }; // 시민이 탈출했거나 죽었을 때 +1 올려서 더이상 시민들 움직임이 출력되지않게 하는 변수
 int citizens_can_move; // 시민들 이동 가능 여부
+int citizens_count; // 시민 수 카운트 
 
 
 
@@ -1166,34 +1168,36 @@ void citizens_move_func() {
 	for (int i = 0; i < citizens_number; i++) {
 		int citizens_r = rand() % 101;
 		citizens_move_list[i] = 0; // 시민이 움직이지 않았을 때의 배열
-		if (citizens_safe_list[i] != 1) {
-			if (100 - p >= citizens_r) { // 시민이 움직일 때
-				citizens_can_move = 1; // 시민이 움직일 수 있을 때 시민 이동 여부를 1로 정하기
-				for (int j = 0; j < citizens_number; j++) {
-					if (i != j && citizens_number_select_list[j] == citizens_number_select_list[i] - 1) { // 만약 시민 -1을 해야되는데 옆에 시민이 있을 때
-						citizens_can_move = 0; // 시민 이동 여부를 0으로 정하기
-						break;
+		if (citizens_safe_or_dead_list[i] == 0) { // 시민이 죽었거나 탈출했을 때 +1 되는 변수 및 배열 시민이 죽었으면 다음 조건문으로 안 감
+			if (citizens_safe_list[i] != 1) {
+				if (100 - p >= citizens_r) { // 시민이 움직일 때
+					citizens_can_move = 1; // 시민이 움직일 수 있을 때 시민 이동 여부를 1로 정하기
+					for (int j = 0; j < citizens_number; j++) {
+						if (i != j && citizens_number_select_list[j] == citizens_number_select_list[i] - 1) { // 만약 시민 -1을 해야되는데 옆에 시민이 있을 때
+							citizens_can_move = 0; // 시민 이동 여부를 0으로 정하기
+							break;
+						}
+					}
+					if (citizens_can_move == 1) { // 시민이 움직였을 때
+						citizens_number_select_list[i] -= 1; // 시민 - 1
+						citizens_aggro_list[i] += 1; // 시민 어그로 + 1 
+						if (citizens_aggro_list[i] >= STM_MAX) {
+							citizens_aggro_list[i] = STM_MAX;
+						}
+						citizens_move_list[i] = 1;
+					}
+					else {
+						citizens_aggro_list[i] -= 1; // 시민 어그로 - 1
+						if (citizens_aggro_list[i] <= STM_MIN) {
+							citizens_aggro_list[i] = STM_MIN;
+						}
 					}
 				}
-				if (citizens_can_move == 1) { // 시민이 움직였을 때
-					citizens_number_select_list[i] -= 1; // 시민 - 1
-					citizens_aggro_list[i] += 1; // 시민 어그로 + 1 
-					if (citizens_aggro_list[i] >= STM_MAX) {
-						citizens_aggro_list[i] = STM_MAX;
-					}
-					citizens_move_list[i] = 1;
-				}
-				else {
-					citizens_aggro_list[i] -= 1; // 시민 어그로 - 1
+				else { // 시민이 움직이지 않았을 때
+					citizens_aggro_list[i] -= 1;
 					if (citizens_aggro_list[i] <= STM_MIN) {
 						citizens_aggro_list[i] = STM_MIN;
 					}
-				}
-			}
-			else { // 시민이 움직이지 않았을 때
-				citizens_aggro_list[i] -= 1;
-				if (citizens_aggro_list[i] <= STM_MIN) {
-					citizens_aggro_list[i] = STM_MIN;
 				}
 			}
 		}
@@ -1272,12 +1276,33 @@ void citizens_escape_func() {
 	for (int i = 0; i < citizens_number; i++) {
 		if (citizens_number_select_list[i] == 1) {
 			citizens_safe_list[i] = 1;
+			printf("citizen %d escape!", citizens_number_select_list[i]);
+			citizens_count -= 1;
+			citizens_safe_or_dead_list[i] = 0;
 		}
 		else {
 			citizens_safe_list[i] = 0;
 		}
 	}
 }
+
+void citizens_dead_from_zombie_func(); // 시민이 좀비에게 공격당해서 죽었을 때
+void citizens_dead_from_zombie_func() {
+	for (int i = 0; i < citizens_number; i++) {
+		if (zombie - 1 == citizens_number_select_list[i]) {
+			citizens_count -= 1;
+			citizens_safe_or_dead_list[i] = 1; // 시민이 죽었을 때
+			printf("citizen %d has been attacked by zombie", citizens_number_select_list[i]);
+			citizens_number_select_list[i] = -1; // 화면상에서 없애버리기
+		}
+	}
+}
+
+
+
+
+
+
 
 // 1) 마동석 시민, 빌런, 좀비 초기 위치 설정 함수
 void character_func();
@@ -1367,6 +1392,7 @@ void busanhang3_3_func() {
 
 	// 시민 생성 수
 	citizens_number = rand() % ((train_length / 2 + 1) - (train_length / 4)) + (train_length / 4); // 기차 길이가 20일 때 6 + 5 -> 5 ~ 10 명의 시민을 생성함.
+	citizens_count = citizens_number + 1; // 시민 생성수 + 원래 있던 시민
 
 	citizens_make_func(); // 시민 생성 및 위치 함수
 	character_func(); // * 마동석, 시민, 좀비 초기 위치 설정 *
@@ -1415,7 +1441,13 @@ void busanhang3_3_func() {
 		}
 		
 		// 시민들이 탈출했을 때
-		
+		citizens_escape_func();
+
+		// 시민이 죽었을 때
+		citizens_dead_from_zombie_func(); 
+
+		// 남은 시민 수 출력
+		printf("%d citizen(s) alive(s).", citizens_count);
 
 
 		// 좀비 공격으로 마동석이 죽었을 때
