@@ -1271,6 +1271,9 @@ void citizens_escape_func();
 void citizens_escape_func() {
 	for (int i = 0; i < citizens_number; i++) {
 		if (citizens_number_select_list[i] == 1) {
+			if (citizens_number_select_list[i] == 0) {
+				printf("citizen %d escape !", citizens_number_select_list[i])
+			}
 			citizens_safe_list[i] = 1;
 		}
 		else {
