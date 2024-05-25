@@ -61,8 +61,28 @@ int villain_pre_aggro; // 빌런 (전) 어그로 상태
 int villain_dead = 0; // 빌런이 죽었을 때 +1 카운트 되는 변수
 int citizen_dead = 0;  // 시민이 죽었을 때 +1 카운트 되는 변수
 int madongseok_dead = 0; // 마동석이 죽었을 때 +1 카운트 되는 변수 
+int stage = 1;
 
 // --<< 필요한 함수 정의 >>--
+
+// 모든 변수 초기화 함수
+void reset_func(); // 부산헹 한 파트가 끝나면 모든 변수를 초기화 한 후 다시 처음부터 시작하게 하기 위한 함수
+void reset_func() {
+	int citizen_aggro = 1; // 시민 1 어그로
+	int madongseok_aggro = 1; // 마동석 어그로
+	int zombie_move_or_not = 1; // 좀비가 마동석의 붙잡기에 따라 움직일지 안 움직일지 정하기
+	int villain_dead = 0; // 빌런이 죽었을 때 +1 카운트 되는 변수
+	int citizen_dead = 0;  // 시민이 죽었을 때 +1 카운트 되는 변수
+	int madongseok_dead = 0; // 마동석이 죽었을 때 +1 카운트 되는 변수 
+	int citizens_number_select_list[LEN_MAX] = { 0 }; // 시민 생성 및 위치 배열
+	int citizens_aggro_list[LEN_MAX] = { 0 }; // 시민 어그로 배열
+	int citizens_move_list[LEN_MAX] = { 0 }; // 시민이 움직였는지 여부를 판단하는 배열
+	int citizens_safe_list[LEN_MAX] = { 0 }; // 시민이 탈출했을 때 +1 되는 배열
+	int citizens_safe_or_dead_list[LEN_MAX] = { 0 }; // 시민이 탈출했거나 죽었을 때 +1 올려서 더이상 시민들 움직임이 출력되지않게 하는 변수
+	int citizens_can_move = 0; // 시민들 이동 가능 여부
+	int citizens_check = 0;
+	int zombie_move_check = 0;
+}
 
 // [ PDF 2-2 부산헹 (1)에서 수정 ]
 // 1) 기차 길이 (입력 및 예외처리) 함수 선언 및 입력 메시지	
@@ -409,7 +429,6 @@ void zombie_move_or_not_func() {
 	else { // 좀비 붙들기에 실패했을 때
 		phase = phase;
 	}
-	return phase;
 }
 
 
@@ -802,6 +821,7 @@ void busanhang2_func() {
 		// 시민이 탈출했을 때
 		if (citizen == 1) {
 			printf("GAME CLEAR! citizen safe !!");
+			stage += 1;
 			break;
 		}
 
@@ -819,6 +839,7 @@ void busanhang2_func() {
 		//
 		phase += 1; // 턴을 1 증가시킨다.
 	} // <- while 문 중괄호
+	reset_func();
 }
 
 
@@ -1097,7 +1118,8 @@ void busanhang3_2_func() {
 		printf("citizen does nothing.\n");
 		// 시민이 탈출했을 때
 		if (citizen == 1) {
-			printf("GAME CLEAR! citizen safe !!");
+			printf("GAME CLEAR! citizen safe !!\n");
+			stage += 1;
 			break;
 		}
 
@@ -1117,6 +1139,7 @@ void busanhang3_2_func() {
 		//
 		phase += 1; // 턴을 1 증가시킨다.
 	} // <- while 문 중괄호
+	reset_func();
 }
 
 
@@ -1129,21 +1152,22 @@ int citizens_aggro_list[LEN_MAX] = { 0 }; // 시민 어그로 배열
 int citizens_move_list[LEN_MAX] = { 0 }; // 시민이 움직였는지 여부를 판단하는 배열
 int citizens_safe_list[LEN_MAX] = { 0 }; // 시민이 탈출했을 때 +1 되는 배열
 int citizens_safe_or_dead_list[LEN_MAX] = { 0 }; // 시민이 탈출했거나 죽었을 때 +1 올려서 더이상 시민들 움직임이 출력되지않게 하는 변수
-int citizens_can_move; // 시민들 이동 가능 여부
+int citizens_can_move = 0; // 시민들 이동 가능 여부
 int citizens_count; // 시민 수 카운트 
-
-
+int citizens_dead_count; // 시민이 죽었을 때 -1 되는 변수
+int citizens_check = 0; // 시민이 움직였는지 체크하는 변수
+int zombie_move_check = 0; // 좀비가 움직일 수 있는 체크하는 변수
 
 // --<< 부산헹(3) [ PDF 3-3 ] 추가된 함수 정리 >>--
 
-// 시민들 생성 및 위치 함수
+// 1) 시민들 생성 및 위치 함수
 void citizens_make_func();
 void citizens_make_func() {
 	for (int i = 0; i < citizens_number; i++) {
 		int same;
 		citizens_aggro_list[i] = 1;
 		while (1) {
-			citizens_number_select_list[i] = rand() % (train_length - 6) + 1;
+			citizens_number_select_list[i] = rand() % (train_length - 7) + 2;
 			same = 1; // 중복 여부 
 
 			// 중복 검사
@@ -1162,7 +1186,7 @@ void citizens_make_func() {
 	}
 }
 
-// 시민들 이동 함수
+// 2) 시민들 이동 함수
 void citizens_move_func();
 void citizens_move_func() {
 	for (int i = 0; i < citizens_number; i++) {
@@ -1204,22 +1228,24 @@ void citizens_move_func() {
 	}
 }
 
-// citizens_move_func()으로 시민들이 움직였을 경우 or 안 움직였을 경우
+// 3) citizens_move_func()으로 시민들이 움직였을 경우 or 안 움직였을 경우
 void citizens_move_or_nomove_func();
 void citizens_move_or_nomove_func() {
 	for (int i = 0; i < citizens_number; i++) {
-		if (citizens_move_list[i] == 1) {
-			// 이동 상태 출력
-			printf("citizen %d: %d -> %d (aggro: %d -> %d)\n", i + 1, citizens_number_select_list[i] + 1, citizens_number_select_list[i], citizens_aggro_list[i] - 1, citizens_aggro_list[i]);
-		}
-		else {
-			// 이동하지 못한 상태 출력
-			printf("citizen %d stay: %d (aggro: %d -> %d)\n", i + 1, citizens_number_select_list[i], citizens_aggro_list[i] + 1, citizens_aggro_list[i]);
+		if (citizens_number_select_list[i] != -1) {
+			if (citizens_move_list[i] == 1) {
+				// 이동 상태 출력
+				printf("citizen %d: %d -> %d (aggro: %d -> %d)\n", i + 1, citizens_number_select_list[i] + 1, citizens_number_select_list[i], citizens_aggro_list[i] - 1, citizens_aggro_list[i]);
+			}
+			else {
+				// 이동하지 못한 상태 출력
+				printf("citizen %d stay: %d (aggro: %d -> %d)\n", i + 1, citizens_number_select_list[i], citizens_aggro_list[i] + 1, citizens_aggro_list[i]);
+			}
 		}
 	}
 }
 
-// 시민 어그로가 최대일 때
+// 4) 시민 어그로가 최대일 때
 void citizen_aggro_if_max_func();
 void citizen_aggro_if_max_func() {
 	// 시민 어그로가 최대가 되면 최대 어그로로 고정.
@@ -1231,7 +1257,7 @@ void citizen_aggro_if_max_func() {
 	}
 }
 
-// 시민 어그로가 최소일 때
+// 5) 시민 어그로가 최소일 때
 void citizen_aggro_if_min_func();
 void citizen_aggro_if_min_func() {
 	// 시민 어그로가 최대가 되면 최대 어그로로 고정.
@@ -1242,46 +1268,50 @@ void citizen_aggro_if_min_func() {
 		citizen_aggro -= 1;
 	}
 }
-// 시민 이동 (항상 좀비 옆옆에 고정적으로 시작하는 시민)
+// 6) 시민 이동 (항상 좀비 옆옆에 고정적으로 시작하는 시민)
 void citizen_0_move_func();
 void citizen_0_move_func() {
 	for (int i = 0; i < citizens_number; i++) {
 		if (citizens_number_select_list[i] != citizen - 1) { // 시민 왼쪽에 시민들이 없을 때
-			if (100 - p >= r) { // 왼쪽 이동(O)
-				pre_citizen = citizen;
-				citizen -= 1;
-				pre_citizen_aggro = citizen_aggro;
-				citizen_aggro_if_max_func();
-				break;
-			}
-			else { // 왼쪽 이동(X)
-				pre_citizen = citizen;
-				pre_citizen_aggro = citizen_aggro;
-				citizen_aggro_if_min_func();
-				break;
-			}
+			citizens_check = 0;
+			break;
 		}
 		else { // 왼쪽에 시민이 있을 때
+			citizens_check = 1;
+		}
+	}
+	if (citizens_check == 0) { // 시민 왼쪽에 시민들이 없을 때
+		if (100 - p >= r) { // 왼쪽 이동(O)
+			pre_citizen = citizen;
+			citizen -= 1;
+			pre_citizen_aggro = citizen_aggro;
+			citizen_aggro_if_max_func();
+		}
+		else { // 왼쪽 이동(X)
 			pre_citizen = citizen;
 			pre_citizen_aggro = citizen_aggro;
 			citizen_aggro_if_min_func();
-			break;
 		}
+	}
+	else { // 왼쪽에 시민이 있을 때
+		pre_citizen = citizen;
+		pre_citizen_aggro = citizen_aggro;
+		citizen_aggro_if_min_func();
 	}
 }
 
-// 시민들이 탈출했을 때 +1 되는 함수
+// 7) 시민들이 탈출했을 때 +1 되는 함수
 void citizens_escape_func();
 void citizens_escape_func() {
 	for (int i = 0; i < citizens_number; i++) {
 		if (citizens_number_select_list[i] == 1) {
-			if (citizens_number_select_list[i] == 0) {
-				printf("citizen %d escape !", citizens_number_select_list[i])
+			citizens_number_select_list[i] = -1;
+			if (citizens_safe_or_dead_list[i] == 0) {
+				citizens_safe_list[i] = 1;
+				printf("citizen %d escape!\n", i+1);
+				citizens_count -= 1;
+				citizens_safe_or_dead_list[i] = 1;
 			}
-			citizens_safe_list[i] = 1;
-			printf("citizen %d escape!", citizens_number_select_list[i]);
-			citizens_count -= 1;
-			citizens_safe_or_dead_list[i] = 0;
 		}
 		else {
 			citizens_safe_list[i] = 0;
@@ -1289,25 +1319,21 @@ void citizens_escape_func() {
 	}
 }
 
-void citizens_dead_from_zombie_func(); // 시민이 좀비에게 공격당해서 죽었을 때
+// 8) 시민이 좀비에게 공격당해서 죽었을 때
+void citizens_dead_from_zombie_func(); 
 void citizens_dead_from_zombie_func() {
 	for (int i = 0; i < citizens_number; i++) {
 		if (zombie - 1 == citizens_number_select_list[i]) {
 			citizens_count -= 1;
 			citizens_safe_or_dead_list[i] = 1; // 시민이 죽었을 때
-			printf("citizen %d has been attacked by zombie", citizens_number_select_list[i]);
+			printf("citizen %d has been attacked by zombie\n", i+1);
 			citizens_number_select_list[i] = -1; // 화면상에서 없애버리기
+			citizens_dead_count -= 1;
 		}
 	}
 }
 
-
-
-
-
-
-
-// 1) 마동석 시민, 빌런, 좀비 초기 위치 설정 함수
+// 9) 마동석 시민, 빌런, 좀비 초기 위치 설정 함수
 void character_func();
 void character_func() {
 	madongseok = train_length - 2;
@@ -1317,7 +1343,7 @@ void character_func() {
 	pre_zombie = zombie;
 }
 
-// 2) 기차 길이 (입력 및 예외처리) 함수 선언
+// 10) 기차 길이 (입력 및 예외처리) 함수 선언
 void BSH3_3_train_length_func();
 void BSH3_3_train_length_func() {
 	// 유효한 값이 입력될 때까지 무한반복
@@ -1331,12 +1357,12 @@ void BSH3_3_train_length_func() {
 	}
 }
 
-// // 3) 기차 모양 (시민, 빌런, 좀비, 마동석 위치) 함수 선언 
+// 11) 기차 모양 (시민, 빌런, 좀비, 마동석 위치) 함수 선언 
 void BSH3_3_train_shape_main_func();
 void BSH3_3_train_shape_first_third_func();
 void BSH3_3_train_shape_second_func();
 
-// 3-1) 기차 첫째 줄, 셋째 줄
+// 11-1) 기차 첫째 줄, 셋째 줄
 void BSH3_3_train_shape_first_third_func() {
 	for (int i = 0; i < train_length; i++) {
 		printf("#");
@@ -1344,7 +1370,7 @@ void BSH3_3_train_shape_first_third_func() {
 	printf("\n");
 }
 
-// 3-2) 기차 둘째 줄
+// 11-2) 기차 둘째 줄
 void BSH3_3_train_shape_second_func() {
 	for (int i = 0; i < train_length; i++) {
 		int citizens_put_in = 0; // 시민들 자리에 왔을 때 +1을 해주기 위한 변수
@@ -1378,13 +1404,140 @@ void BSH3_3_train_shape_second_func() {
 	printf("\n");
 }
 
-// 3-3) 기차 함수 메인
+// 11-3) 기차 함수 메인
 void BSH3_3_train_shape_main_func() {
 	BSH3_3_train_shape_first_third_func();
 	BSH3_3_train_shape_second_func();
 	BSH3_3_train_shape_first_third_func();
 }
 
+// 12) 좀비 -> 시민 이동 함수
+void zombie_move_to_citizens_func();
+void zombie_move_to_citizens_func() {
+	// 마동석이 좀비 붙들기를 성공했을 때 (좀비 이동 불가)
+	zombie_move_or_not_func();
+	// 시민과 이미 인접해있을 때
+	if (citizen_dead == 0) {
+		if (zombie - 1 == citizen) {
+			zombie = zombie;
+		}
+		else { // 민접해 있지 않을 때
+			pre_zombie = zombie;
+			zombie -= 1;
+		}
+	}
+	else {
+		for (int i = 0; i < citizens_number; i++) {
+			if (zombie - 1 == citizens_number_select_list[i]) {
+				zombie_move_check = 1;
+				break;
+			}
+		}
+		if (zombie_move_check == 1) { // 좀비와 시민이 인접해있을 때
+			zombie = zombie;
+		}
+		else { // 좀비와 시민이 인접해있지 않을 때
+			pre_zombie = zombie;
+			zombie -= 1;
+		}
+	}
+}
+
+// 13) 부산헹(2) 좀비 이동 함수에서의 좀비와 시민 관계 코드
+int zombie_move_to_citizen_func();
+int zombie_move_to_citizen_func() {
+	if (citizen_aggro > madongseok_aggro) { // 시민 어그로가 마동석 어그로보다 클 때
+		zombie_move_citizen_func();
+
+	}
+	else if (madongseok_aggro > citizen_aggro) { // 마동석 어그로가 시민 어그로보다 클 때
+		zombie_move_madongseok_func();
+
+	}
+	else { // 시민 어그로와 마동석 어그로가 같을 때
+		zombie_move_citizen_func();
+	}
+}
+
+// 14) 좀비 이동 함수
+void zombie_move_from_citizens_func();
+void zombie_move_from_citizens_func() {
+	if (phase % 2 == 1) {
+		if (zombie_move_or_not == 1) {
+			if (citizen_dead == 1) {
+				for (int i = 0; i < citizens_number; i++) {
+					if (citizens_number_select_list[i] == zombie - 1) {
+						if (citizens_aggro_list[i] > madongseok_aggro) {
+							zombie_move_to_citizens_func();
+							break;
+						}
+						else if (citizens_aggro_list[i] < madongseok_aggro) {
+							zombie_move_madongseok_func();
+							break;
+						}
+						else {
+							zombie_move_to_citizens_func();
+							break;
+						}
+					}
+				}
+			}
+			else {
+				zombie_move_to_citizen_func();
+			}
+		}
+	}
+}
+
+
+// 15) 시민이 탈출했을 때
+void citizen_escape_func();
+void citizen_escape_func() {
+	if (citizen == 1) {
+		printf("citizen escape!!\n");
+		citizens_count -= 1;
+		citizen = -1;
+	}
+}
+
+// 16) 남은 시민 수 출력
+void citizens_howmany_message_func();
+void citizens_howmany_message_func() {
+	if (citizens_count != 0) {
+		printf("%d citizen(s) alive(s).\n", citizens_count);
+	}
+}
+
+// 17) 좀비가 시민 또는 마동석을 공격했을 때
+void citizens_madongseok_dead_func();
+void citizens_madongseok_dead_func() {
+	if (citizen_dead == 1) { // 시민이 죽었을 때
+		for (int i = 0; i < citizens_number; i++) {
+			if (citizens_number_select_list[i] == zombie - 1 && zombie + 1 == madongseok) { // 좀비가 시민과 마동석과 인접할 때
+				if (citizens_aggro_list[i] > madongseok_aggro) { // 시민어그로가 더 클 때
+					citizens_count -= 1;
+					citizens_safe_or_dead_list[i] = 1; // 시민이 죽었을 때
+					printf("citizen %d has been attacked by zombie\n", citizens_number_select_list[i]);
+					citizens_number_select_list[i] = -1; // 화면상에서 없애버리기
+					citizens_dead_count -= 1;
+				}
+				else { // 마동석 어그로가 더 클 때
+					madongseok_aggro_biggerthan_citizen_func();
+					if (madongseok_stamina == STM_MIN) { // 마동석 체력이 STM_MIN 일 때
+						madongseok_dead_message_func();
+						madongseok_dead += 1;
+					}
+				}
+			}
+			else {
+				zombie_attack_nobody_func();
+			}
+		}
+	}
+	else { // 시민이 살아있을 때
+		citizen_madongseok_dead_func();
+	}
+}
 
 
 // --<<<   부산헹(3) [ PDF 3-3. 스테이지3: 시민'들' ]  >>>--
@@ -1396,6 +1549,7 @@ void busanhang3_3_func() {
 	// 시민 생성 수
 	citizens_number = rand() % ((train_length / 2 + 1) - (train_length / 4)) + (train_length / 4); // 기차 길이가 20일 때 6 + 5 -> 5 ~ 10 명의 시민을 생성함.
 	citizens_count = citizens_number + 1; // 시민 생성수 + 원래 있던 시민
+	citizens_dead_count = citizens_number + 1; // 시민이 죽었을 때 -1 카운트 되는 변수
 
 	citizens_make_func(); // 시민 생성 및 위치 함수
 	character_func(); // * 마동석, 시민, 좀비 초기 위치 설정 *
@@ -1413,7 +1567,7 @@ void busanhang3_3_func() {
 		
 		citizens_move_func(); // 시민들 움직이는 함수 불러오기 
 		citizen_0_move_func(); // 시민 움직이는 함수 불러오기
-		zombie_move_func(); // 좀비 이동 함수 불러오기
+		zombie_move_from_citizens_func(); // 좀비 이동 함수 불러오기
 		printf("\n");
 		BSH3_3_train_shape_main_func(); // 기차 상태 불러오기
 		printf("\n");
@@ -1422,8 +1576,8 @@ void busanhang3_3_func() {
 		citizen_move_or_nomove_func();
 		//  citizens_move_func()으로 시민들이 움직였을 때 or 안 움직였을 경우
 		citizens_move_or_nomove_func(); 
-		// zombie_move_func() 으로 인해 좀비가 움직였을 경우 or 안 움직였을 경우
-		zombie_move_or_nomove_func(); // 홀수턴
+		// zombie_move_from_citizens_func() 으로 인해 좀비가 움직였을 경우 or 안 움직였을 경우
+		zombie_move_or_nomove_func(); // 홀수턴 
 		zombie_cannot_move_func(); // 짝수턴
 
 		printf("\n");
@@ -1438,10 +1592,7 @@ void busanhang3_3_func() {
 		printf("\n");
 
 		// 시민이 탈출했을 때
-		if (citizen == 1) {
-			
-			
-		}
+		citizen_escape_func();
 		
 		// 시민들이 탈출했을 때
 		citizens_escape_func();
@@ -1450,22 +1601,38 @@ void busanhang3_3_func() {
 		citizens_dead_from_zombie_func(); 
 
 		// 남은 시민 수 출력
-		printf("%d citizen(s) alive(s).", citizens_count);
+		citizens_howmany_message_func();
 
+		if (citizens_count == 0) {
+			if (citizens_dead_count == 0) {
+				printf("GAME OVER! citizens all dead...\n");
+				break;
+			}
+			else {
+				printf("GAME CLEAR! %d citizen(s) alive(s)!\n", citizens_dead_count);
+				stage += 1;
+				break;
+			}
+		}
 
 		// 좀비 공격으로 마동석이 죽었을 때
+		citizens_madongseok_dead_func();
 			if (madongseok_dead == 1) {
+				printf("GAME OVER! madongseok dead...\n");
 			break;
 		}
 
 		// 마동석 행동 여부
-		madongseok_action_yesorno_func();
+		madongseok_action_yesorno_func(); // 이 함수 새로 만들어야 됨
 		//
 		phase += 1; // 턴을 1 증가시킨다.
 	}
-
+	reset_func();
 }
 
+
+
+// 부산헹 3-4
 
 
 
@@ -1528,9 +1695,21 @@ int main(void) {
 	// -< 메인 코드 초기 부분 >-
 	srand((unsigned int)time(NULL)); // 무작위 랜덤 난수
 	// -< 메인 코드 메인 부분 >-
+	//if (stage == 1) { // 부산헹 (2)
+	//	busanhang2_func();
+	//	if (stage == 2) { // 부산헹 (3-2)
+	//		busanhang3_2_func();
+	//		if (stage == 3) { // 부산헹 (3-3)
+	//			busanhang3_3_func();
+	//			if (stage == 4) { // 부산헹 (3-4)
+
+	//			}
+	//		}
+	//	}
+	//}
 	//busanhang2_func(); // 부산헹(2) 함수 불러오기
 	//busanhang3_2_func(); // 부산헹(3-2) 함수 불러오기 0
-	busanhang3_3_func();
+	//busanhang3_3_func();
 	return 0;
 
 } // <- int main(void) 중괄호
