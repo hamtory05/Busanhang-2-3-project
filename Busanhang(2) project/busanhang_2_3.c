@@ -842,6 +842,11 @@ void busanhang2_func() {
 	reset_func();
 }
 
+/////////// << 다음 스테이지 >> ///////////
+/////////// << 다음 스테이지 >> ///////////
+/////////// << 다음 스테이지 >> ///////////
+/////////// << 다음 스테이지 >> ///////////
+/////////// << 다음 스테이지 >> ///////////
 
 
 // --<< 부산헹(3) [ PDF 3-2 ] 추가된 전역 변수 >>--
@@ -1142,7 +1147,11 @@ void busanhang3_2_func() {
 	reset_func();
 }
 
-
+/////////// << 다음 스테이지 >> ///////////
+/////////// << 다음 스테이지 >> ///////////
+/////////// << 다음 스테이지 >> ///////////
+/////////// << 다음 스테이지 >> ///////////
+/////////// << 다음 스테이지 >> ///////////
 
 
 // --<< 부산헹(3) [ PDF 3-3 ] 추가된 전역 변수 >>--
@@ -1630,17 +1639,207 @@ void busanhang3_3_func() {
 	reset_func();
 }
 
-
-
-// 부산헹 3-4
-
-
-
-
+/////////// << 다음 스테이지 >> ///////////
+/////////// << 다음 스테이지 >> ///////////
+/////////// << 다음 스테이지 >> ///////////
+/////////// << 다음 스테이지 >> ///////////
+/////////// << 다음 스테이지 >> ///////////
 
 
 
 
+// --<< 부산헹(3) [ PDF 3-4 ] 추가된 전역 변수 >>--
+int citizens_change_zombie_list[LEN_MAX] = { 0 }; // 시민들이 좀비로 바뀌었을 때 +1 되는 변수
+int citizen_change_zombie = 0; // 시민이 좀비로 바뀌었을 때 +1 되는 변수
+
+
+// --<< 부산헹(3) [ PDF 3-4 ] 추가된 함수 정리 >>--
+
+// 시민들과 좀비가 인접했을 때 강화좀비로 바뀌는 함수
+void citizens_with_zombie_change_func();
+void citizens_with_zombie_change_func() {
+	for (int i = 0; i < citizens_number; i++) {
+		if (citizens_change_zombie_list[i] == 0) {
+			if (citizens_number_select_list[i] == zombie - 1) {
+				citizens_change_zombie_list[i] = 1;
+				printf("citizens %d turned into a zombie!", i + 1);
+			}
+		}
+	}
+}
+
+// 시민과 좀비가 인접했을 때 강화좀비로 바뀌는 함수
+void citizen_with_zombie_change_func();
+void citizen_with_zombie_change_func() {
+	if (citizen_change_zombie == 0) {
+		if (citizen == zombie - 1) {
+			citizen_change_zombie = 1;
+			printf("citizen turned into a zombie!");
+		}
+	}
+}
+
+// 기차 상태 출력
+void BSH3_4_train_shape_second_func();
+void BSH3_4_train_shape_second_func() {
+	for (int i = 0; i < train_length; i++) {
+		int citizens_put_in = 0; // 시민들 자리에 왔을 때 +1을 해주기 위한 변수
+		int citizens_put_in_zombie = 0; // 시민들이 좀비로 변해있는 경우 +1 해주는 변수
+		for (int j = 0; j < citizens_number; j++) {
+			if (citizens_number_select_list[j] == i) { // i가 citizens_number_select_list[j]일 때 citizens_put_in = 1로 만듦.
+				citizens_put_in = 1;
+				break;
+			}
+		}
+		for (int j = 0; j < citizens_number; j++) {
+			if (citizens_change_zombie_list[j] == 1) { // 시민이 좀비로 변해있는 경우 citizens_put_in_zombie 변수를 1로 바꿔줌
+				citizens_put_in_zombie = 1;
+			}
+		}
+		if (citizens_put_in == 1) {
+			if (citizens_put_in_zombie == 1) { // 시민이 좀비가 되었을 때
+				printf("Z");
+			}
+			else { // 시민이 좀비로 변하지 않았을 때
+				printf("C");
+			}
+		}
+		// 기차의 처음과 끝을 '#' 으로 마무리 
+		else if (i == 0 || i == train_length - 1) { 
+			printf("#"); 
+		} 
+		else if (i == citizen) { // 시민 1 
+			if (citizen_change_zombie == 1) { // 시민이 좀비로 변했을 때
+				printf("Z");
+			}
+			else { // 시민이 좀비로 변하지 않았을 때
+				printf("C");
+			}
+		}
+		else if (i == zombie) {
+			printf("Z");
+		}
+		else if (i == madongseok) {
+			printf("M");
+		}
+		else {
+			printf(" ");
+		}
+
+	}
+	printf("\n");
+}
+
+// 기차 상태 메인 함수
+void BSH3_4_train_shape_main_func();
+void BSH_3_4_train_shape_main_func() {
+	BSH3_3_train_shape_first_third_func;
+	BSH3_4_train_shape_second_func();
+	BSH3_3_train_shape_first_third_func();
+}
+
+// 강화 좀비 이동 함수
+void super_zombie_move_func();
+void super_zombie_move_func() {
+
+}
+
+
+
+
+
+
+
+// --<<<   부산헹(3) [ PDF 3-4. 스테이지4: 변이 ]  >>>--
+
+void busanhang3_4_func();
+void busanhang3_4_func() {
+	printf("Start Busanhang(3_4)!\n");
+	BSH3_3_train_length_func();
+
+	// 시민 생성 수
+	citizens_number = rand() % ((train_length / 2 + 1) - (train_length / 4)) + (train_length / 4); // 기차 길이가 20일 때 6 + 5 -> 5 ~ 10 명의 시민을 생성함.
+	citizens_count = citizens_number + 1; // 시민 생성수 + 원래 있던 시민
+	citizens_dead_count = citizens_number + 1; // 시민이 죽었을 때 -1 카운트 되는 변수
+
+	citizens_make_func(); // 시민 생성 및 위치 함수
+	character_func(); // * 마동석, 시민, 좀비 초기 위치 설정 *
+	madongseok_stamina_func(); // 마동석 체력 (예외처리 O) 함수 불러오기
+	probability_func(); // 확률 입력 (예외처리 O) 함수 불러오기
+	printf("\n");
+
+	BSH3_3_train_shape_main_func(); // 기차 초기 상태 불러오기
+	printf("\n\n\n");
+
+	// -< 메인 코드 메인 부분 >-
+	while (1) {
+		r = rand() % 101; // 시민 난수 출력
+		k = rand() % 101; // 마동석 난수 출력
+
+		citizens_move_func(); // 시민들 움직이는 함수 불러오기 
+		citizen_0_move_func(); // 시민 움직이는 함수 불러오기
+		zombie_move_from_citizens_func(); // 좀비 이동 함수 불러오기
+		printf("\n");
+		BSH3_3_train_shape_main_func(); // 기차 상태 불러오기
+		printf("\n");
+
+		// citizen_move_func으로 시민이 움직였을 때 or 안 움직였을 경우 
+		citizen_move_or_nomove_func();
+		//  citizens_move_func()으로 시민들이 움직였을 때 or 안 움직였을 경우
+		citizens_move_or_nomove_func();
+		// zombie_move_from_citizens_func() 으로 인해 좀비가 움직였을 경우 or 안 움직였을 경우
+		zombie_move_or_nomove_func(); // 홀수턴 
+		zombie_cannot_move_func(); // 짝수턴
+
+		printf("\n");
+		madongseok_move_func(); // 마동석 이동 결정 함수
+		printf("\n");
+		BSH3_3_train_shape_main_func(); // 기차 상태 출력 함수
+		printf("\n\n");
+
+		// 마동석 이동
+		madongseok_move_main_func();
+
+		printf("\n");
+
+		// 시민이 탈출했을 때
+		citizen_escape_func();
+
+		// 시민들이 탈출했을 때
+		citizens_escape_func();
+
+		// 시민이 죽었을 때
+		citizens_dead_from_zombie_func();
+
+		// 남은 시민 수 출력
+		citizens_howmany_message_func();
+
+		if (citizens_count == 0) {
+			if (citizens_dead_count == 0) {
+				printf("GAME OVER! citizens all dead...\n");
+				break;
+			}
+			else {
+				printf("GAME CLEAR! %d citizen(s) alive(s)!\n", citizens_dead_count);
+				stage += 1;
+				break;
+			}
+		}
+
+		// 좀비 공격으로 마동석이 죽었을 때
+		citizens_madongseok_dead_func();
+		if (madongseok_dead == 1) {
+			printf("GAME OVER! madongseok dead...\n");
+			break;
+		}
+
+		// 마동석 행동 여부
+		madongseok_action_yesorno_func(); // 이 함수 새로 만들어야 됨
+		//
+		phase += 1; // 턴을 1 증가시킨다.
+	}
+	
+}
 
 
 
