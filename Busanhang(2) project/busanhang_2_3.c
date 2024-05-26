@@ -1681,9 +1681,11 @@ void busanhang3_3_func() {
 
 // --<< 부산헹(3) [ PDF 3-4 ] 추가된 전역 변수 >>--
 int citizens_change_zombie_list[LEN_MAX] = { 0 }; // 시민들이 좀비로 바뀌었을 때 +1 되는 변수
+int citizens_change_zombie_message_list[LEN_MAX] = { 0 }; // 시민'들'이 좀비로 바뀌었을 때 출력되는 메세지 배열
 int citizen_change_zombie = 0; // 시민이 강화 좀비로 바뀌었을 때 +1 되는 변수
 int citizen_turn_super_zombie_message = 0;
 int all_citizens_check = -1;
+int super_citizen_move_check = 0; // 0이면 안 움직이기, 1이면 움직이기
 
 // --<< 부산헹(3) [ PDF 3-4 ] 추가된 함수 정리 >>--
 
@@ -1692,34 +1694,21 @@ void BSH3_4_train_shape_second_func();
 void BSH3_4_train_shape_second_func() {
 	for (int i = 0; i < train_length; i++) {
 		int citizens_put_in = 0; // 시민들 자리에 왔을 때 +1을 해주기 위한 변수
-		int citizens_put_in_zombie = 0; // 시민들이 좀비로 변해있는 경우 +1 해주는 변수
 		for (int j = 0; j < citizens_number; j++) {
-			if (citizens_number_select_list[j] == i) { // i가 citizens_number_select_list[j]일 때 citizens_put_in = 1로 만듦.
+			if (citizens_number_select_list[j] == i) {
 				citizens_put_in = 1;
-				if (citizens_change_zombie_list[j] >= 1) { // 시민이 좀비로 변해있는 경우
-					citizens_put_in_zombie = 1;
-				}
 				break;
 			}
 		}
 		if (citizens_put_in == 1) {
-			if (citizens_put_in_zombie == 1) { // 시민이 좀비가 되었을 때
-				printf("Z");
-			}
-			else { // 시민이 좀비로 변하지 않았을 때
-				printf("C");
-			}
+			printf("C");
 		}
-		else if (i == 0 || i == train_length - 1) { // 기차의 처음과 끝을 '#' 으로 마무리 
+		// 기차의 처음과 끝을 '#' 으로 마무리
+		else if (i == 0 || i == train_length - 1) {
 			printf("#");
 		}
-		else if (i == citizen) { // 시민 1 
-			if (citizen_change_zombie == 1) { // 시민이 좀비로 변했을 때
-				printf("Z");
-			}
-			else { // 시민이 좀비로 변하지 않았을 때
-				printf("C");
-			}
+		else if (i == citizen) { // 시민 1
+			printf("C");
 		}
 		else if (i == zombie) {
 			printf("Z");
@@ -1730,6 +1719,7 @@ void BSH3_4_train_shape_second_func() {
 		else {
 			printf(" ");
 		}
+
 	}
 	printf("\n");
 }
@@ -1742,21 +1732,34 @@ void BSH3_4_train_shape_main_func() {
 	BSH3_3_train_shape_first_third_func();
 }
 
-// 좀비가 시민과 마동석 둘 다 인접했을 때
-void BSH3_4_zombie_with_citizen_and_madongseok_func();
-void BSH3_4_zombie_with_citizen_and_madongseok_func() {
-	if (phase % 2 == 0) {
-
-	}
-}
-
 // 좀비가 시민 또는 마동석을 공격했을 때
 void BSH3_4_citizen_attacked_by_zombie();
 void BSH3_4_citizen_attacked_by_zombie() {
 	if (phase % 2 == 1) {
-		if (zombie_move_or_not == 1) { // 마동석 붙들기 성공
-			if (citizen_change_zombie == 0) { // 시민이 강화좀비가 아닐 때
-				if (citizen_aggro > madongseok_aggro) {
+		if (citizen_change_zombie == 0) { // 시민이 강화좀비가 아닐 때
+			if (zombie_move_or_not == 1) { // 마동석 붙들기 실패
+				if (citizen_aggro > madongseok_aggro) { // 시민 어그로 > 마동석 어그로
+					if (zombie - 1 == citizen) { // 시민 == 좀비
+						citizen_turn_super_zombie_message = 1; // 강화 좀비로 변환됨을 알려주는 메세지 변수
+						citizen_change_zombie = 1; // 강화좀비로 변환
+					}
+					else {
+						pre_zombie = zombie;
+						zombie -= 1;
+					}
+				}
+				else if (madongseok_aggro > citizen_aggro) { // 마동석 어그로 > 시민 어그로
+					if (zombie + 1 == madongseok) { // 마동석 == 좀비
+						pre_madongseok_stamina = madongseok_stamina;
+						madongseok_stamina -= 1;
+						madongseok_attack = 1;
+					}
+					else {
+						pre_zombie = zombie;
+						zombie += 1;
+					}
+				}
+				else { // 시민 어그로 == 마동석 어그로
 					if (zombie - 1 == citizen) {
 						citizen_change_zombie = 1; // 강화좀비로 변환
 					}
@@ -1765,28 +1768,157 @@ void BSH3_4_citizen_attacked_by_zombie() {
 						zombie -= 1;
 					}
 				}
-				else if (madongseok_aggro > citizen_aggro) {
-					if (zombie + 1 == madongseok) {
-
-					}
-					else {
-
-					}
-				}
 			}
-			else { // 시민이 강화좀비 일 때
+			else { // 마동석 붙들기 성공
+				zombie_move_or_not_func();
+			}
+		}
+		else { // 시민이 강화 좀비 일 때
+			if (zombie - 1 == citizen) {
 
+			}
+			else {
+				pre_zombie = zombie;
+				zombie -= 1;
 			}
 		}
 	}
 }
 
+// 시민이 강화좀비가 되었을 때 출력되는 메세지
+void citizen_turn_super_zombie_message_func();
+void citizen_turn_super_zombie_message_func() {
+	if (citizen_turn_super_zombie_message == 1) {
+		printf("citizen turn into a SUPER ZOMBIE !!");
+		citizen_turn_super_zombie_message = 2; // 2로 바꿈으로써 무한 반복될 때 한번만 출력되게 함.
+	}
+}
+
+// 강화 좀비 (시민) -> 시민'들' 공격 함수
+void BSH3_4_super_citizen_zombie_attack_func();
+void BSH3_4_super_citizen_zombie_attack_func() {
+	for (int i = 0; i < citizens_number; i++) {
+		if (citizens_change_zombie_list[i] == 0) { // 시민'들' 중 강화 좀비가 아닌 시민'들' 일 때
+			if (citizen - 1 == citizens_number_select_list[i]) {
+				citizens_change_zombie_list[i] = 1; // 1이면 강화좀비로 변신, 0이면 강화좀비 X
+				super_citizen_move_check = 0; // 0이면 안 움직이기, 1이면 움직이기
+				break;
+			}
+			else {
+				super_citizen_move_check = 1; // 0이면 안 움직이기, 1이면 움직이기
+			}
+		}
+		else { // 시민'들' 중 강화 좀비인 시민'들' 일 때
+			if (citizen - 1 == citizens_number_select_list[i]) {
+				super_citizen_move_check = 1; // 0이면 안 움직이기, 1이면 움직이기
+				break;
+			}
+			else {
+				super_citizen_move_check = 0; // 0이면 안 움직이기, 1이면 움직이기
+			}
+		}
+	}
+}
+
+// 강화 좀비 (시민) 이동 함수
+void BSH3_4_super_citizen_zombie_move_func();
+void BSH3_4_super_citizen_zombie_move_func() {
+	if (super_citizen_move_check == 1) { // 시민 왼쪽 이동
+		pre_citizen = citizen;
+		citizen -= 1;
+	}
+	else { // 시민 왼쪽 이동 X
+
+	}
+}
+
+// 강화 좀비 (시민) 이동 메세지 출력 함수
+void BSH3_4_super_citizen_zombie_move_message_func();
+void BSH3_4_super_citizen_zombie_move_message_func() {
+	if (pre_citizen == citizen) {
+		printf("SUPER ZOMBIE stay: %d", citizen);
+	}
+	else {
+		printf("SUPER ZOMBIE: %d -> %d", pre_citizen, citizen);
+	}
+}
+
+int super_citizens_move_check_list[LEN_MAX] = { 0 };
+int BSH3_4_citizens_move_check_list[LEN_MAX] = { 0 };
+
+// 강화 좀비 (시민'들') 공격 함수
+void BSH3_4_super_citizens_attack_func();
+void BSH3_4_super_citizens_attack_func() {
+	for (int i = 0; i < citizens_number; i++) {
+		if (citizens_change_zombie_list[i] == 1) { // 강화 좀비 (시민'들') 일 때
+			for (int j = 0; j < citizens_number; j++) {
+				if (citizens_number_select_list[i] == citizens_number_select_list[j] - 1) { // 강화 좀비 (시민'들') 과 시민'들'이 만났을 때
+					citizens_change_zombie_list[j] = 1;
+					citizens_change_zombie_message_list[j] = 1;
+					super_citizens_move_check_list[i] = 1; // 1이면 안 움직이기 0이면 움직이기
+					break;
+				}
+				else {
+					super_citizens_move_check_list[i] = 0; // 1이면 안 움직이기 0이면 움직이기
+				}
+			}
+		}
+		else { // 그냥 시민'들' 일 때
+			for (int j = 0; j < citizens_number; j++) {
+				if (citizens_number_select_list[i] == citizens_number_select_list[j] - 1) { // 시민'들'과 시민'들이 만났을 때
+					BSH3_4_citizens_move_check_list[i] = 0; // 0이면 안 움직이기
+				}
+				else {
+					if (citizens_aggro_list[i] >= AGGRO_MAX) {
+						citizens_aggro_list[i] = AGGRO_MAX;
+					}
+					else {
+						citizens_aggro_list[i] += 1;
+					}
+					BSH3_4_citizens_move_check_list[i] = 1; // 1이면 움직이기
+				}
+			}
+		}
+	}
+}
+
+// 시민'들' 이동 함수
+void BSH3_4_citizens_move_func();
+void BSH3_4_citizens_move_func() {
+	for (int i = 0; i < citizens_number; i++) {
+		if (BSH3_4_citizens_move_check_list[i] == 1) { // 시민'들' 움직이기
+			printf("citizen %d: %d -> %d (aggro: %d -> %d)\n", i + 1, citizens_number_select_list[i] + 1, citizens_number_select_list[i], citizens_aggro_list[i] - 1, citizens_aggro_list[i]);
+		}
+		else { // 시민'들' 안 움직이기
+			printf("citizen %d stay: %d (aggro: %d -> %d)\n", i + 1, citizens_number_select_list[i], citizens_aggro_list[i] + 1, citizens_aggro_list[i]);
+		}
+	}
+}
+
+// 강화 좀비 (시민'들') 이동 함수
+void BSH3_4_super_citizens_move_func();
+void BSH3_4_super_citizens_move_func() {
+	for (int i = 0; i < citizens_number; i++) {
+		if (super_citizens_move_check_list[i] == 1) { // 강화 좀비 (시민'들') 안 움직이기
+			printf("SUPER ZOMBIE %d stay: %d\n", i + 1, citizens_number_select_list[i]);
+		}
+		else { // 강화 좀비 (시민'들') 움직이기
+			printf("SUPER ZOMBIE %d: %d -> %d\n", i + 1, citizens_number_select_list[i] - 1, citizens_number_select_list[i]);
+		}
+	}
+}
 
 
-
-
-
-
+// 시민'들'이 강화 좀비가 되었을 때 출력되는 메세지
+void BSH3_4_citizens_turn_super_zombie_message_func();
+void BSH3_4_citizens_turn_super_zombie_message_func() {
+	for (int i = 0; i < citizens_number; i++) {
+		if (citizens_change_zombie_message_list[i] == 1) {
+			printf("citizen %d turn into a SUPER ZOMBIE !!", i + 1);
+			citizens_change_zombie_message_list[i] = 2;
+		}
+	}
+}
 
 
 
@@ -1839,6 +1971,48 @@ void busanhang3_4_func() {
 	while (1) {
 		r = rand() % 101; // 시민 난수 출력
 		k = rand() % 101; // 마동석 난수 출력
+
+		// 시민'들' 이동
+
+		
+
+		// 시민 이동
+
+		if (citizen_change_zombie == 0) { // 시민이 강화좀비가 아닐 때
+			citizen_move_func(); // 시민 이동 함수 불러오기
+		}
+		else { // 시민이 강화 좀비 일 때
+
+		}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 		
 		//
