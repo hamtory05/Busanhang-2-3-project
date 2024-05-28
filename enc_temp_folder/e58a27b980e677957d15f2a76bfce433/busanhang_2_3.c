@@ -1968,34 +1968,49 @@ void BSH3_4_zombie_move_func() {
 				}
 			}
 
+			int next_position;
 			if (BSH3_4_zombie_move_citizen_or_madongseok == 0) { // 시민일 때
-				if (zombie - 1 == citizen) { // 시민과 붙어있으면 못 움직임
-					pre_zombie = zombie;
-					BSH3_4_zombie_move_citizen_or_madongseok = 2;
+				next_position = zombie - 1;
+				int collision = 0;
+				for (int i = 0; i < citizens_number; i++) {
+					if (citizens_change_zombie_list[i] == 1 && citizens_number_select_list[i] == next_position) {
+						collision = 1;
+						break;
+					}
 				}
-				else if (zombie - 1 != citizen) { // 시민과 인접하지 않았을 때 움직임
+				if (collision == 0 && next_position != citizen) { // 이동하려는 위치가 강화 좀비 또는 시민이 아닐 때
 					pre_zombie = zombie;
-					zombie -= 1;
+					zombie = next_position;
+				}
+				else {
+					pre_zombie = zombie;
 				}
 			}
 			else { // 마동석일 때
-				if (zombie + 1 != madongseok) { // 좀비와 마동석이 인접 X
+				next_position = zombie + 1;
+				int collision = 0;
+				for (int i = 0; i < citizens_number; i++) {
+					if (citizens_change_zombie_list[i] == 1 && citizens_number_select_list[i] == next_position) {
+						collision = 1;
+						break;
+					}
+				}
+				if (collision == 0 && next_position != madongseok) { // 이동하려는 위치가 강화 좀비 또는 마동석이 아닐 때
 					pre_zombie = zombie;
-					zombie += 1;
+					zombie = next_position;
 					if (zombie + 1 == madongseok) { // 이동해서 인접해질 때
 						madongseok_attack = 1;
 						pre_madongseok_stamina = madongseok_stamina;
 						madongseok_stamina -= 1;
 					}
-					else { // 이동해서 민접 X
-
-					}
 				}
-				else { // 이미 마동석과 좀비가 인접했을 경우
-					BSH3_4_zombie_move_citizen_or_madongseok = 2;
-					madongseok_attack = 1;
-					pre_madongseok_stamina = madongseok_stamina;
-					madongseok_stamina -= 1;
+				else {
+					pre_zombie = zombie;
+					if (zombie + 1 == madongseok) { // 이미 마동석과 인접했을 경우
+						madongseok_attack = 1;
+						pre_madongseok_stamina = madongseok_stamina;
+						madongseok_stamina -= 1;
+					}
 				}
 			}
 		}
