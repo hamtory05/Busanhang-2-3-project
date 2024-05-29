@@ -64,26 +64,43 @@ int madongseok_dead = 0; // 마동석이 죽었을 때 +1 카운트 되는 변�
 int stage = 1;
 int madongseok_attack = 0; // 좀비가 마동석을 공격했을 때
 
+// 부산헹 (3-3) 에 쓰이는 변수들 -> 변수 초기화 함수 때매 위로 올렸음
+int citizens_number; // 시민 생성 수
+int citizens_number_select_list[LEN_MAX] = { 0 }; // 시민 생성 및 위치 배열
+int citizens_aggro_list[LEN_MAX] = { 0 }; // 시민 어그로 배열
+int citizens_move_list[LEN_MAX] = { 0 }; // 시민이 움직였는지 여부를 판단하는 배열
+int citizens_safe_list[LEN_MAX] = { 0 }; // 시민이 탈출했을 때 +1 되는 배열
+int citizens_safe_or_dead_list[LEN_MAX] = { 0 }; // 시민이 탈출했거나 죽었을 때 +1 올려서 더이상 시민들 움직임이 출력되지않게 하는 변수
+int citizens_can_move = 0; // 시민들 이동 가능 여부
+int citizens_count; // 시민 수 카운트 
+int citizens_dead_count; // 시민이 죽었을 때 -1 되는 변수
+int citizens_check = 0; // 시민이 움직였는지 체크하는 변수
+int zombie_move_check = 0; // 좀비가 움직일 수 있는 체크하는 변수
+
 // --<< 필요한 함수 정의 >>--
 
 // 모든 변수 초기화 함수
 void reset_func(); // 부산헹 한 파트가 끝나면 모든 변수를 초기화 한 후 다시 처음부터 시작하게 하기 위한 함수
 void reset_func() {
-	int citizen_aggro = 1; // 시민 1 어그로
-	int madongseok_aggro = 1; // 마동석 어그로
-	int zombie_move_or_not = 1; // 좀비가 마동석의 붙잡기에 따라 움직일지 안 움직일지 정하기
-	int villain_dead = 0; // 빌런이 죽었을 때 +1 카운트 되는 변수
-	int citizen_dead = 0;  // 시민이 죽었을 때 +1 카운트 되는 변수
-	int madongseok_dead = 0; // 마동석이 죽었을 때 +1 카운트 되는 변수 
+	//
+	citizen_aggro = 1; // 시민 1 어그로
+	madongseok_aggro = 1; // 마동석 어그로
+	zombie_move_or_not = 1; // 좀비가 마동석의 붙잡기에 따라 움직일지 안 움직일지 정하기
+	villain_dead = 0; // 빌런이 죽었을 때 +1 카운트 되는 변수
+	citizen_dead = 0;  // 시민이 죽었을 때 +1 카운트 되는 변수
+	madongseok_dead = 0; // 마동석이 죽었을 때 +1 카운트 되는 변수 
+	phase = 1; // 턴
+	//
 	int citizens_number_select_list[LEN_MAX] = { 0 }; // 시민 생성 및 위치 배열
 	int citizens_aggro_list[LEN_MAX] = { 0 }; // 시민 어그로 배열
 	int citizens_move_list[LEN_MAX] = { 0 }; // 시민이 움직였는지 여부를 판단하는 배열
 	int citizens_safe_list[LEN_MAX] = { 0 }; // 시민이 탈출했을 때 +1 되는 배열
 	int citizens_safe_or_dead_list[LEN_MAX] = { 0 }; // 시민이 탈출했거나 죽었을 때 +1 올려서 더이상 시민들 움직임이 출력되지않게 하는 변수
-	int citizens_can_move = 0; // 시민들 이동 가능 여부
-	int citizens_check = 0;
-	int zombie_move_check = 0;
-	int madongseok_attack = 0;
+	citizens_can_move = 0; // 시민들 이동 가능 여부
+	citizens_check = 0;
+	zombie_move_check = 0;
+	//
+	madongseok_attack = 0;
 }
 
 // [ PDF 2-2 부산헹 (1)에서 수정 ]
@@ -806,10 +823,33 @@ void citizen_madongseok_dead_func() {
 	}
 }
 
+// 인트로
+void intro();
+void intro() {
+	printf("              ,\n");
+	printf("          _,-\"\"-._\n");
+	printf("        ,\"        \".\n");
+	printf("       /    ,-,  ,\"\\ \n");
+	printf("      \"    /   \\ | o|\n");
+	printf("      \\    `-o-\"  `-' \n");
+	printf("       `,   _.--'`'--`\n");
+	printf("         `--`---'        |   _)\n");
+	printf("           ,' '      _  /  _ \\  ` \\   _ \\ |  -_)\n");
+	printf("         ./ ,  `,    ___|\\___/_|_|_|_.__/_|\\___|\n");
+	printf("         / /     \\\n");
+	printf("        (_)))_ _,\"\n");
+	printf("           _))))_,\n");
+	printf("  --------(_,-._)))-------------------------------\n");
+}
+
 // 9) --<<<  부산헹(2) 함수  >>>--
 void busanhang2_func();
 
 void busanhang2_func() {
+	printf("BUSANHANG 2 START ! !\n");
+	intro();
+	printf("\n");
+
 	train_length_func(); // 기차 길이 출력(예외처리 O) 함수 불러오기
 	madongseok_stamina_func(); // 마동석 체력 (예외처리 O) 함수 불러오기
 	probability_func(); // 확률 입력 (예외처리 O) 함수 불러오기
@@ -848,7 +888,7 @@ void busanhang2_func() {
 
 		// 시민이 탈출했을 때
 		if (citizen == 1) {
-			printf("GAME CLEAR! citizen safe !!");
+			printf("GAME CLEAR! citizen safe !!\n");
 			stage += 1;
 			break;
 		}
@@ -1109,7 +1149,10 @@ void citizen_madongseok_villain_dead_func() {
 // --<<<   부산헹(3) [ PDF 3-2. 스테이지2: 빌런 ]  >>>--
 void busanhang3_2_func();
 void busanhang3_2_func() {
-	printf("3_2\n");
+	printf("BUSANHANG 3 STAGE 1 START ! !\n");
+	intro();
+	printf("\n");
+
 	BSH3_2_train_length_func(); // 기차 길이 출력(예외처리 O) 함수 불러오기
 	madongseok_stamina_func(); // 마동석 체력 (예외처리 O) 함수 불러오기
 	probability_func(); // 확률 입력 (예외처리 O) 함수 불러오기
@@ -1162,9 +1205,11 @@ void busanhang3_2_func() {
 
 		// 좀비 공격으로 시민 또는 마동석이 죽었을 때
 		if (citizen_dead == 1) {
+			printf("GAME OVER citizen dead...\n");
 			break;
 		}
 		if (madongseok_dead == 1) {
+			printf("GAME OVER madongseok dead...\n");
 			break;
 		}
 
@@ -1184,17 +1229,17 @@ void busanhang3_2_func() {
 
 
 // --<< 부산헹(3) [ PDF 3-3 ] 추가된 전역 변수 >>--
-int citizens_number; // 시민 생성 수
-int citizens_number_select_list[LEN_MAX] = { 0 }; // 시민 생성 및 위치 배열
-int citizens_aggro_list[LEN_MAX] = { 0 }; // 시민 어그로 배열
-int citizens_move_list[LEN_MAX] = { 0 }; // 시민이 움직였는지 여부를 판단하는 배열
-int citizens_safe_list[LEN_MAX] = { 0 }; // 시민이 탈출했을 때 +1 되는 배열
-int citizens_safe_or_dead_list[LEN_MAX] = { 0 }; // 시민이 탈출했거나 죽었을 때 +1 올려서 더이상 시민들 움직임이 출력되지않게 하는 변수
-int citizens_can_move = 0; // 시민들 이동 가능 여부
-int citizens_count; // 시민 수 카운트 
-int citizens_dead_count; // 시민이 죽었을 때 -1 되는 변수
-int citizens_check = 0; // 시민이 움직였는지 체크하는 변수
-int zombie_move_check = 0; // 좀비가 움직일 수 있는 체크하는 변수
+//int citizens_number; // 시민 생성 수
+//int citizens_number_select_list[LEN_MAX] = { 0 }; // 시민 생성 및 위치 배열
+//int citizens_aggro_list[LEN_MAX] = { 0 }; // 시민 어그로 배열
+//int citizens_move_list[LEN_MAX] = { 0 }; // 시민이 움직였는지 여부를 판단하는 배열
+//int citizens_safe_list[LEN_MAX] = { 0 }; // 시민이 탈출했을 때 +1 되는 배열
+//int citizens_safe_or_dead_list[LEN_MAX] = { 0 }; // 시민이 탈출했거나 죽었을 때 +1 올려서 더이상 시민들 움직임이 출력되지않게 하는 변수
+//int citizens_can_move = 0; // 시민들 이동 가능 여부
+//int citizens_count; // 시민 수 카운트 
+//int citizens_dead_count; // 시민이 죽었을 때 -1 되는 변수
+//int citizens_check = 0; // 시민이 움직였는지 체크하는 변수
+//int zombie_move_check = 0; // 좀비가 움직일 수 있는 체크하는 변수
 
 // --<< 부산헹(3) [ PDF 3-3 ] 추가된 함수 정리 >>--
 
@@ -1584,7 +1629,10 @@ void citizens_madongseok_dead_func() {
 // --<<<   부산헹(3) [ PDF 3-3. 스테이지3: 시민'들' ]  >>>--
 void busanhang3_3_func();
 void busanhang3_3_func() {
-	printf("3_3\n");
+	printf("BUSANHANG 3 STAGE 2 START ! !\n");
+	intro();
+	printf("\n");
+
 	BSH3_3_train_length_func();
 
 	// 시민 생성 수
@@ -1635,7 +1683,7 @@ void busanhang3_3_func() {
 		// 좀비 공격으로 마동석이 죽었을 때
 		citizens_madongseok_dead_func();
 		if (citizen_dead == 1) {
-			printf("citizen dead...\n");
+			printf("GAME OVER! citizen dead...\n");
 			citizen = -1;
 			citizens_count -= 1;
 			citizen_dead = 2;
@@ -2060,7 +2108,10 @@ void BSH3_4_citizens_escape_func() {
 
 void busanhang3_4_func();
 void busanhang3_4_func() {
-	printf("Start Busanhang(3_4)!\n");
+	printf("BUSANHANG 3 STAGE 3 START ! !\n");
+	intro();
+	printf("\n");
+
 	BSH3_3_train_length_func();
 
 	// 시민 생성 수
@@ -2133,7 +2184,7 @@ void busanhang3_4_func() {
 		citizen_escape_func();
 
 		// 시민들 탈출
-		citizens_escape_func();
+		BSH3_4_citizens_escape_func();
 
 		// 남은 시민 수 출력
 		citizens_howmany_message_func();
@@ -2164,72 +2215,48 @@ void busanhang3_4_func() {
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+/////////// << 부산헹 메인 함수 >> ///////////
+/////////// << 부산헹 메인 함수 >> ///////////
+/////////// << 부산헹 메인 함수 >> ///////////
+/////////// << 부산헹 메인 함수 >> ///////////
+/////////// << 부산헹 메인 함수 >> ///////////
+/////////// << 부산헹 메인 함수 >> ///////////
+/////////// << 부산헹 메인 함수 >> ///////////
+/////////// << 부산헹 메인 함수 >> ///////////
+/////////// << 부산헹 메인 함수 >> ///////////
+/////////// << 부산헹 메인 함수 >> ///////////
+/////////// << 부산헹 메인 함수 >> ///////////
+/////////// << 부산헹 메인 함수 >> ///////////
+/////////// << 부산헹 메인 함수 >> ///////////
+/////////// << 부산헹 메인 함수 >> ///////////
+/////////// << 부산헹 메인 함수 >> ///////////
 
 
 // --<< 메인 코드 작성 >>--
+
 int main(void) {
 	// -< 메인 코드 초기 부분 >-
 	srand((unsigned int)time(NULL)); // 무작위 랜덤 난수
 	// -< 메인 코드 메인 부분 >-
-	//if (stage == 1) { // 부산헹 (2)
-	//	busanhang2_func();
-	//	if (stage == 2) { // 부산헹 (3-2)
-	//		busanhang3_2_func();
-	//		if (stage == 3) { // 부산헹 (3-3)
-	//			busanhang3_3_func();
-	//			if (stage == 4) { // 부산헹 (3-4)
-					//busanhang3_4_func();
-	//			}
-	//		}
-	//	}
-	//}
+
+	if (stage == 1) { // 부산헹 (2)
+		busanhang2_func();
+		if (stage == 2) { // 부산헹 (3-2)
+			busanhang3_2_func();
+			if (stage == 3) { // 부산헹 (3-3)
+				busanhang3_3_func();
+				if (stage == 4) { // 부산헹 (3-4)
+					busanhang3_4_func();
+				}
+			}
+		}
+	}
+
+	// --<  부산헹 하나씩 확인  >--
 	//busanhang2_func(); // 부산헹(2) 함수 불러오기
-	//busanhang3_2_func(); // 부산헹(3-2) 함수 불러오기 0
-	//busanhang3_3_func();
-	busanhang3_4_func();
+	//busanhang3_2_func(); // 부산헹(3-2) 함수 불러오기 
+	//busanhang3_3_func(); // 부산헹 (3-3) 함수 불러오기 
+	//busanhang3_4_func(); // 부산헹 (3-4) 함수 불러오기
 	return 0;
 
 } // <- int main(void) 중괄호
