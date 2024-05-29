@@ -2000,6 +2000,9 @@ void BSH3_4_zombie_move_func() {
 			}
 		}
 	}
+	else {
+		madongseok_attack = 0;
+	}
 }
 
 
@@ -2020,18 +2023,20 @@ void BSH3_4_zombie_attack_citizen_func() {
 // 좀비 이동 메세지 출력
 void BSH3_4_zombie_move_message_func();
 void BSH3_4_zombie_move_message_func() {
-	if (BSH3_4_zombie_move_citizen_or_madongseok == 0) {
-		pre_zombie = zombie;
-		zombie -= 1;
-		printf("zombie: %d -> %d\n", pre_zombie, zombie);
-	}
-	else if (BSH3_4_zombie_move_citizen_or_madongseok == 1) {
-		pre_zombie = zombie;
-		zombie += 1;
-		printf("zombie: %d -> %d\n", pre_zombie, zombie);
-	}
-	else if (BSH3_4_zombie_move_citizen_or_madongseok == 2) {
-		printf("zombie stay: %d\n", zombie);
+	if (phase % 2 == 1) {
+		if (BSH3_4_zombie_move_citizen_or_madongseok == 0) {
+			pre_zombie = zombie;
+			zombie -= 1;
+			printf("zombie: %d -> %d\n", pre_zombie, zombie);
+		}
+		else if (BSH3_4_zombie_move_citizen_or_madongseok == 1) {
+			pre_zombie = zombie;
+			zombie += 1;
+			printf("zombie: %d -> %d\n", pre_zombie, zombie);
+		}
+		else if (BSH3_4_zombie_move_citizen_or_madongseok == 2) {
+			printf("zombie stay: %d\n", zombie);
+		}
 	}
 }
 
