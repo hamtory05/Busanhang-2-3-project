@@ -1740,23 +1740,23 @@ void busanhang3_3_func() {
 int citizens_change_zombie_list[LEN_MAX] = { 0 }; // 시민들이 좀비로 바뀌었을 때 +1 되는 변수
 int citizens_change_zombie_message_list[LEN_MAX] = { 0 }; // 시민'들'이 좀비로 바뀌었을 때 출력되는 메세지 배열
 int citizen_change_zombie = 0; // 시민이 강화 좀비로 바뀌었을 때 +1 되는 변수
-int citizen_turn_super_zombie_message = 0;
-int all_citizens_check = -1;
+int citizen_turn_super_zombie_message = 0; // 시민이 강화좀비가 되었을 때 +1 되고 메세지를 출력할 수 있게 해주는 변수
+int all_citizens_check = -1; // 모든 시민을 확인하는 변수
 int super_citizen_move_check = 0; // 0이면 안 움직이기, 1이면 움직이기
 int super_citizens_move[LEN_MAX] = { 0 }; // 강화좀비 (시민들) 움직일 때는 1 안 움직일 때는 0
-int BSH3_4_zombie_attack_citizen = 0;
+int BSH3_4_zombie_attack_citizen = 0; // 좀비가 시민을 공격했을 때 +1 해주는 변수
 int BSH3_4_zombie_move_citizen_or_madongseok = 0; // 0일 때 시민, 1일 때 마동석, 2일 때 stay
 
 // --<< 부산헹(3) [ PDF 3-4 ] 추가된 함수 정리 >>--
 
-// 기차 둘째 줄
+// 1) 기차 둘째 줄
 void BSH3_4_train_shape_second_func();
 void BSH3_4_train_shape_second_func() {
 	for (int i = 0; i < train_length; i++) {
 		int citizens_put_in = 0; // 시민들 자리에 왔을 때 +1을 해주기 위한 변수
 		for (int j = 0; j < citizens_number; j++) {
-			if (citizens_number_select_list[j] == i) {
-				citizens_put_in = 1;
+			if (citizens_number_select_list[j] == i) { 
+				citizens_put_in = 1; 
 				if (citizens_change_zombie_list[j] == 0) {
 					printf("C");
 				}
@@ -1793,7 +1793,7 @@ void BSH3_4_train_shape_second_func() {
 	printf("\n");
 }
 
-// 기차 상태 출력
+// 2) 기차 상태 출력
 void BSH3_4_train_shape_main_func();
 void BSH3_4_train_shape_main_func() {
 	BSH3_3_train_shape_first_third_func();
@@ -1801,7 +1801,7 @@ void BSH3_4_train_shape_main_func() {
 	BSH3_3_train_shape_first_third_func();
 }
 
-// 시민들 (강화 좀비 포함) 이동 함수
+// 3) 시민들 (강화 좀비 포함) 이동 함수
 void BSH3_4_citizens_super_zombies_move_func();
 void BSH3_4_citizens_super_zombies_move_func() {
 	for (int i = 0; i < citizens_number; i++) {
@@ -1848,7 +1848,7 @@ void BSH3_4_citizens_super_zombies_move_func() {
 					break;
 				}
 			}
-			if (citizens_can_move == 1) {
+			if (citizens_can_move == 1) { // 강화좀비 (시민들) 이동
 				citizens_number_select_list[i] -= 1;
 				super_citizens_move[i] = 1;
 			}
@@ -1858,7 +1858,7 @@ void BSH3_4_citizens_super_zombies_move_func() {
 }
 
 
-// 시민들이 움직였을 때
+// 4) 시민들이 움직였을 때
 void BSH3_4_citizens_move_or_nomove_func();
 void BSH3_4_citizens_move_or_nomove_func() {
 	for (int i = 0; i < citizens_number; i++) {
@@ -1878,18 +1878,18 @@ void BSH3_4_citizens_move_or_nomove_func() {
 	}
 }
 
-// 강화좀비 (시민들) 움직였을 때
+// 5) 강화좀비 (시민들) 움직였을 때
 void BSH3_4_super_citizens_move_or_nomove_func();
 void BSH3_4_super_citizens_move_or_nomove_func() {
 	for (int i = 0; i < citizens_number; i++) {
 		if (citizens_number_select_list[i] <= -1) {
 			continue; // 탈출한 시민은 출력 X
 		}
-		if (citizens_change_zombie_list[i] == 1) {
-			if (super_citizens_move[i] == 1) {
+		if (citizens_change_zombie_list[i] == 1) { // 강화 좀비 일 때
+			if (super_citizens_move[i] == 1) { // 움직이는 경우 일 때
 				printf("SUPER ZOMBIE %d: %d -> %d\n", i + 1, citizens_number_select_list[i] + 1, citizens_number_select_list[i]);
 			}
-			else {
+			else { // 움직이지 않는 경우일 때
 				printf("SUPER ZOMBIE %d stay: %d\n", i + 1, citizens_number_select_list[i]);
 			}
 		}
@@ -1902,7 +1902,7 @@ void BSH3_4_super_citizens_move_or_nomove_func() {
 
 
 
-// 시민 이동
+// 6) 시민 이동
 void BSH3_4_citizen_super_zombie_move();
 void BSH3_4_citizen_super_zombie_move() {
 	citizens_check = 0; // 초기화
@@ -1943,26 +1943,26 @@ void BSH3_4_citizen_super_zombie_move() {
 	}
 }
 
-// 강화 좀비 (시민) 이동
+// 7) 강화 좀비 (시민) 이동
 void BSH3_4_super_citizen_move_or_nomove_func();
 void BSH3_4_super_citizen_move_or_nomove_func() {
-	if (citizen_change_zombie == 1) {
-		if (citizen == pre_citizen) {
+	if (citizen_change_zombie == 1) { // 강화좀비 일 때
+		if (citizen == pre_citizen) { // 안 움직였을 때
 			printf("SUPER ZOMBIE stay: %d\n", citizen);
 		}
-		else {
+		else { // 움직였을 때
 			printf("SUPER ZOMBIE: %d -> %d\n", pre_citizen, citizen);
 		}
 	}
 }
 
 
-// 시민들이 죽었을 때
+// 8) 시민들이 죽었을 때
 void BSH3_4_citizens_dead_from_zombie_func();
 void BSH3_4_citizens_dead_from_zombie_func() {
 	for (int i = 0; i < citizens_number; i++) {
-		if (citizens_change_zombie_list[i] == 0) {
-			if (citizen - 1 == citizens_number_select_list[i]) {
+		if (citizens_change_zombie_list[i] == 0) { // 시민들이 살아있을 때
+			if (citizen - 1 == citizens_number_select_list[i]) { // 강화좀비(시민)과 시민들이 인접했을 때
 				citizens_count -= 1;
 				printf("citizen %d has been attacked by zombie\n", i + 1);
 				printf("citizens %d turn into a SUPER ZOMBIE!!\n", i + 1);
@@ -1970,8 +1970,8 @@ void BSH3_4_citizens_dead_from_zombie_func() {
 				citizens_dead_count -= 1;
 			}
 			for (int j = 0; j < citizens_number; j++) {
-				if (citizens_change_zombie_list[j] == 1) {
-					if (citizens_number_select_list[i] == citizens_number_select_list[j] - 1 || citizens_number_select_list[i] == citizens_number_select_list[j] + 1) {
+				if (citizens_change_zombie_list[j] == 1) { // 강화좀비(시민들)일 때
+					if (citizens_number_select_list[i] == citizens_number_select_list[j] - 1) { // 시민들이 강화좀비(시민들)와 인접했을 때
 						citizens_count -= 1;
 						printf("citizen %d has been attacked by zombie\n", i + 1);
 						printf("citizens %d turn into a SUPER ZOMBIE!!\n", i + 1);
@@ -1987,12 +1987,12 @@ void BSH3_4_citizens_dead_from_zombie_func() {
 
 
 
-//좀비 이동
+// 9) 좀비 이동
 void BSH3_4_zombie_move_func();
 void BSH3_4_zombie_move_func() {
-	if (phase % 2 == 1) {
+	if (phase % 2 == 1) { // 홀수 턴일 때
 		if (BSH3_4_zombie_attack_citizen == 0) { // 시민이 살아있을 때
-			if (zombie_move_or_not == 1) {
+			if (zombie_move_or_not == 1) { // 마동석 붙들기에 실패했을 때
 				madongseok_attack = 0;
 				if (citizen_aggro > madongseok_aggro) {
 					zombie_move_citizen_func();
@@ -2054,11 +2054,11 @@ void BSH3_4_zombie_move_func() {
 }
 
 
-// 시민이 강화좀비가 될 때
+// 10) 시민이 강화좀비가 될 때
 void BSH3_4_zombie_attack_citizen_func();
 void BSH3_4_zombie_attack_citizen_func() {
-	if (citizen == zombie - 1) {
-		if (citizen_change_zombie == 0) {
+	if (citizen == zombie - 1) { // 시민과 좀비가 인접했을 때
+		if (citizen_change_zombie == 0) { // 그 시민이 살아있는 시민이라면
 			BSH3_4_zombie_attack_citizen = 1;
 			printf("citizen turn into a SUPER ZOMBIE !!\n");
 			citizens_count -= 1;
@@ -2068,10 +2068,10 @@ void BSH3_4_zombie_attack_citizen_func() {
 	}
 }
 
-// 좀비 이동 메세지 출력
+// 11) 좀비 이동 메세지 출력
 void BSH3_4_zombie_move_message_func();
 void BSH3_4_zombie_move_message_func() {
-	if (phase % 2 == 1) {
+	if (phase % 2 == 1) { // 홀수 턴일 때
 		if (BSH3_4_zombie_move_citizen_or_madongseok == 0) {
 			pre_zombie = zombie;
 			zombie -= 1;
@@ -2088,13 +2088,13 @@ void BSH3_4_zombie_move_message_func() {
 	}
 }
 
-// 시민들이 탈출했을 때 +1 되는 함수
+// 12) 시민들이 탈출했을 때 +1 되는 함수
 void BSH3_4_citizens_escape_func();
 void BSH3_4_citizens_escape_func() {
 	for (int i = 0; i < citizens_number; i++) {
-		if (citizens_number_select_list[i] == 1 && citizens_safe_list[i] == 0) {
+		if (citizens_number_select_list[i] == 1 && citizens_safe_list[i] == 0) { // 시민들이 기차 첫번째 자리에 왔을 때
 			citizens_number_select_list[i] = -1; // 탈출한 시민의 위치를 -1로 설정
-			if (citizens_change_zombie_list[i] == 0) {
+			if (citizens_change_zombie_list[i] == 0) { // 살아있는 시민들일 때
 				citizens_safe_list[i] = 1;
 				printf("citizen %d escape!\n", i + 1);
 				citizens_count -= 1;
